@@ -105,3 +105,26 @@ under 25k tokens" rule, since the SDK's own tool results are out of reach — on
 Pure + tested (`npm run test`, 58 assertions). See `docs/TOKEN_OPTIMIZATION.md`
 §10 for the full SDK-controlled-vs-Forge-controlled lever taxonomy and honest
 limits (MCP tool-definition occupancy is not measurable from Forge).
+
+## Four more levers — as much as the architecture honestly allows (2026-06-19)
+
+The report's remaining four (observation masking, semantic response caching,
+prompt compression, RAG) — each with a pure tested core; wired only where the
+local-only / CLI-wrapper architecture permits (full detail + honest limits in
+`docs/TOKEN_OPTIMIZATION.md` §11):
+
+- **RAG / Contextual Retrieval** (`src/main/retrieval/`) — chunk workspace
+  content, BM25-rank top-k for the query (reuses `memory/bm25`), inject fresh-turn
+  only with `path:line` provenance (model-free Contextual Retrieval). Naturally
+  gated: no term overlap ⇒ nothing injected. **Live.**
+- **Response cache** (`efficiency/responseCache.ts`) — pure LRU+TTL; normalized-
+  exact by default (no embedder ⇒ not true semantic). Wired to **read-only goose
+  delegations only** (write tasks never cached). **Live, scoped.**
+- **Prose squeeze** (`efficiency/compress.ts` `squeezeProse`) — model-free filler-
+  phrase removal (not stopword removal; not true LLMLingua). Applied to memory
+  prose only, never code. **Live, conservative.**
+- **Observation masking** (`efficiency/mask.ts`) — faithful pure core, but the
+  live CLI loop owns its history so it can't be masked (same limit as
+  `clear_tool_uses`); ships as a **tested core, not live-wired.**
+
+All pure cores covered by `npm run test` (75 total); typecheck + build green.

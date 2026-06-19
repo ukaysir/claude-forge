@@ -243,6 +243,42 @@ export function capToolResult(
   }
 }
 
+// Low-signal filler PHRASES that are safe to drop from injected PROSE context
+// without changing meaning. We target known-redundant phrases rather than doing
+// stopword removal (which corrupts code and can change meaning) — the safe,
+// model-free analog of LLMLingua's perplexity-based token dropping. True
+// LLMLingua needs a small LM to score tokens, which Forge has no in-process
+// equivalent for, so this is deliberately conservative.
+const FILLER: [RegExp, string][] = [
+  [/\bin order to\b/gi, 'to'],
+  [/\bplease note that\b/gi, ''],
+  [/\bit (?:is|'s) (?:worth|important) (?:noting|to note) that\b/gi, ''],
+  [/\bas (?:you can|we can) see\b/gi, ''],
+  [/\bplease\b/gi, ''],
+  [/\bbasically\b/gi, ''],
+  [/\bessentially\b/gi, ''],
+  [/\bvery\b/gi, ''],
+  [/\bin general\b/gi, ''],
+  [/\bof course\b/gi, '']
+]
+
+/**
+ * Squeeze injected PROSE (memory facts, retrieved-chunk headers) by dropping
+ * low-signal filler phrases + tightening whitespace. Conservative and model-free
+ * — NOT to be applied to code (it only removes English filler words/phrases).
+ * Safe to no-op: returns the input minus filler, never reorders or rewrites.
+ */
+export function squeezeProse(input: string): string {
+  let s = input
+  for (const [re, rep] of FILLER) s = s.replace(re, rep)
+  return s
+    .replace(/[ \t]{2,}/g, ' ') // collapse internal whitespace runs
+    .replace(/ +([,.;:!?])/g, '$1') // no space before punctuation
+    .replace(/\n[ \t]+/g, '\n') // strip leading indent on prose lines
+    .replace(/[ \t]+\n/g, '\n') // strip trailing whitespace
+    .trim()
+}
+
 export interface ContextPart {
   /** Short label rendered as a section header (e.g. "memory", "repo map"). */
   label: string

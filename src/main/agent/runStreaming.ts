@@ -22,6 +22,7 @@ import { active, pendingDialogs, pendingPerms } from './state'
 import { emitAgentEvent } from '../pet/bus'
 import { buildMemoryInjection, noteRunWorkspace } from '../memory'
 import { buildRepoMapInjection } from '../repomap'
+import { buildRetrievalInjection } from '../retrieval'
 import { estimateTokens } from '../efficiency/compress'
 import type { ActiveQuery, AgentEvent, AgentEventBody, QuestionResult, RunOptions } from './types'
 
@@ -166,6 +167,11 @@ export async function runStreaming(
     const blocks: string[] = []
     const repo = await buildRepoMapInjection(cwd)
     if (repo.text) blocks.push(repo.text)
+    // RAG (docs/TOKEN_OPTIMIZATION.md §11): top-k workspace content chunks relevant
+    // to the prompt. Naturally gated — injects nothing when the query has no term
+    // overlap — so it complements the structural repo map with actual code passages.
+    const rag = await buildRetrievalInjection(cwd, prompt)
+    if (rag.text) blocks.push(rag.text)
     const mem = await buildMemoryInjection(prompt, { workspaceId: opts.workspaceId })
     if (mem.text) blocks.push(mem.text)
     if (blocks.length) {

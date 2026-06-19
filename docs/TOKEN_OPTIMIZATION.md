@@ -265,3 +265,51 @@ typecheck ✅ · selftest 133 ✅.
   (~100토큰/개)만 상시 비용 → 우선순위 낮음.
 - **제약 준수**: 본 작업은 보고서의 하드 제약("모델·노력 불변, 하니스 구조만 변경")을 지킨다 — thinking
   budget 캡·강제 모델 다운그레이드·서브에이전트 수 축소는 *하지 않았다*(품질 저하 레버라 제외).
+
+---
+
+## 11. 남은 4개 레버 — 정직하게 적용 가능한 만큼만 (2026-06-19)
+
+보고서의 "미적용" 4개(관찰 마스킹·시맨틱 응답 캐싱·프롬프트 압축·RAG)를 진행. **핵심: 각 레버의
+"진짜" 버전은 Forge의 로컬-전용·CLI-래퍼 구조에서 부분적으로만 가능**하다. 모든 레버는 **순수 코어 +
+헤들리스 테스트**(`npm run test`, 효율 12 + 청크 4 신규)로 검증하고, 불가능한 부분은 흉내 내지 않고
+명시한다. 정적 게이트: typecheck ✅ · build ✅(렌더러 339모듈, main 번들에 retrieval/efficiency 포함) ·
+test 75 ✅ · selftest 133 ✅ · lint 신규 0.
+
+| 레버 | "진짜" 버전 가능? | Forge가 한 것 | 라이브 배선 |
+|---|---|---|---|
+| **RAG / Contextual Retrieval** | ✅ 가능 | 워크스페이스 **콘텐츠 청크**를 BM25로 top-k 검색해 주입 | ✅ 라이브 |
+| **시맨틱 응답 캐싱** | ◐ 부분 | 임베딩 없음 → **정규화-정확/렉시컬** 캐시 | ✅ delegate(읽기전용)만 |
+| **프롬프트 압축(LLMLingua)** | ◐ 부분 | 소형 LM 없음 → **모델-프리 prose squeeze** | ✅ memory 주입 |
+| **관찰 마스킹** | ⛔ 라이브 불가 | 순수 코어만 | ❌ (CLI가 히스토리 소유) |
+
+### 11.1 RAG / Contextual Retrieval ✅ (라이브, 최고 가치)
+- `src/main/retrieval/` — `chunk.ts`(순수: 파일→라인윈도우 청크, 오버랩) + `scan.ts`(콘텐츠 스캔,
+  fingerprint 캐시) + `index.ts`(기존 `memory/bm25` 재사용해 쿼리로 top-k 랭크). repo-map(구조)을
+  실제 **코드 구절**로 보완.
+- 주입: **fresh 턴만**(캐시 안정), 1200토큰 예산, top-6, 각 청크에 `// path:line` 헤더 = **모델-프리
+  Contextual Retrieval**(Anthropic은 LM으로 맥락 문장 생성; Forge는 경로를 맥락으로 사용 — 토큰 0).
+- **자연 게이트**: BM25는 용어가 겹칠 때만 청크 반환 → 무관한 프롬프트엔 0 주입(노이즈/블로트 방지).
+  쿼리 토큰 <3이면 스킵.
+
+### 11.2 시맨틱 응답 캐싱 ◐ (delegate 읽기전용만)
+- `src/main/efficiency/responseCache.ts` — 순수 LRU+TTL 캐시. **임베딩 모델이 in-process에 없어
+  진짜 시맨틱(벡터) 매칭은 불가** → 기본 **정규화-정확 매칭**(threshold 1, false-positive=0), 옵션
+  렉시컬 Jaccard(threshold<1).
+- 배선: **goose `delegate`의 읽기전용 위임만** 캐시(cwd+instruction 키, 5분 TTL). 쓰기 위임은
+  부작용이 있어 **절대 캐시 안 함**. 상태 의존적 메인 에이전트 턴엔 적용 안 함(보고서의 "조용히 틀린
+  답" 위험 회피). 같은 lookup 반복 시 무료-모델 재호출 절약.
+
+### 11.3 프롬프트 압축(LLMLingua) ◐ (모델-프리)
+- `compress.ts`에 `squeezeProse()` 추가 — **저신호 필러 *구문* 제거**(stopword 제거가 아님: 코드 손상·
+  의미 변화 위험 회피) + 공백 정리. **진짜 LLMLingua는 소형 LM의 perplexity 점수가 필요해 모델-프리로는
+  불가** → 보수적 휴리스틱임을 명시.
+- 배선: **memory 주입 prose에만** 적용(코드엔 미적용). 효과는 작지만 안전.
+
+### 11.4 관찰 마스킹 ⛔ (순수 코어만, 라이브 불가)
+- `src/main/efficiency/mask.ts` — `maskObservations()`(최근 k개 full, 오래된 건 `[masked: ~N tokens]`).
+  JetBrains "The Complexity Trap" 충실 구현 + 테스트.
+- **라이브 배선 불가**: 마스킹은 *진행 중 대화 히스토리*의 옛 툴 출력을 교체하는 기법인데, Forge의
+  히스토리는 `claude` CLI 서브프로세스가 소유 → 중간에 재작성 불가(`clear_tool_uses`와 동일 한계).
+  Forge가 소유한 라이브 "관찰 리스트"가 없어, 흉내 배선 대신 **테스트된 순수 코어로만** 출하. 의도된
+  적용처는 오케스트레이션 blackboard(현재 chat-트리거 전용·런타임 호출자 없음)이며, 엔진 재배선 시 사용.

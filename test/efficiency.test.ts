@@ -9,8 +9,11 @@ import {
   compressText,
   compressContext,
   capToolResult,
+  squeezeProse,
   FORGE_CONTEXT_TOKEN_CAP
 } from '../src/main/efficiency/compress'
+import { maskObservations } from '../src/main/efficiency/mask'
+import { createResponseCache } from '../src/main/efficiency/responseCache'
 
 // ── compress.ts (headroom) ───────────────────────────────────────────────────
 test('estimateTokens: ~4 chars/token', () => {
@@ -112,4 +115,81 @@ test('capToolResult: empty input is safe', () => {
   const r = capToolResult('')
   assert.equal(r.text, '')
   assert.equal(r.truncated, false)
+})
+
+// ── squeezeProse (model-free LLMLingua analog) ───────────────────────────────
+test('squeezeProse: drops filler phrases and tightens whitespace', () => {
+  const r = squeezeProse('Please note that in order to  build , you basically run it .')
+  assert.ok(!/please note that/i.test(r))
+  assert.ok(!/basically/i.test(r))
+  assert.match(r, /\bto build,/)
+  assert.ok(!/ {2,}/.test(r), 'collapses double spaces')
+  assert.ok(!/ ,/.test(r), 'no space before punctuation')
+})
+
+test('squeezeProse: leaves clean prose essentially intact', () => {
+  assert.equal(squeezeProse('The cache key is the file path.'), 'The cache key is the file path.')
+})
+
+// ── maskObservations (JetBrains observation masking) ─────────────────────────
+test('maskObservations: keeps recent in full, masks older', () => {
+  const big = 'x'.repeat(2000)
+  const obs = [
+    { label: 's1', text: big },
+    { label: 's2', text: big },
+    { label: 's3', text: 'recent result' }
+  ]
+  const out = maskObservations(obs, { keepRecent: 1 })
+  assert.match(out, /s1: output masked/)
+  assert.match(out, /s2: output masked/)
+  assert.ok(out.includes('recent result'), 'most-recent kept in full')
+  assert.ok(out.length < big.length, 'older payloads dropped')
+})
+
+test('maskObservations: tiny observations are not masked', () => {
+  const obs = [
+    { label: 'a', text: 'short' },
+    { label: 'b', text: 'also short' }
+  ]
+  const out = maskObservations(obs, { keepRecent: 0, minMaskTokens: 50 })
+  assert.ok(out.includes('short'))
+  assert.ok(!/output masked/.test(out))
+})
+
+// ── createResponseCache (lexical/exact response cache) ───────────────────────
+test('responseCache: normalized-exact hit ignores case/whitespace', () => {
+  const c = createResponseCache<string>()
+  c.set('Summarize  the  FILE', 'done')
+  assert.equal(c.get('summarize the file'), 'done')
+  assert.equal(c.get('summarize something else'), undefined)
+})
+
+test('responseCache: TTL expiry via injected clock', () => {
+  let t = 1000
+  const c = createResponseCache<string>({ ttlMs: 100, now: () => t })
+  c.set('q', 'v')
+  t = 1050
+  assert.equal(c.get('q'), 'v')
+  t = 2000
+  assert.equal(c.get('q'), undefined, 'expired past TTL')
+})
+
+test('responseCache: fuzzy match only when threshold < 1', () => {
+  const exact = createResponseCache<string>({ threshold: 1 })
+  exact.set('classify the payment webhook event', 'A')
+  assert.equal(exact.get('classify payment webhook events'), undefined)
+  const fuzzy = createResponseCache<string>({ threshold: 0.5 })
+  fuzzy.set('classify the payment webhook event', 'A')
+  assert.equal(fuzzy.get('classify the payment webhook events please'), 'A')
+})
+
+test('responseCache: LRU eviction respects capacity', () => {
+  const c = createResponseCache<number>({ maxEntries: 2 })
+  c.set('a', 1)
+  c.set('b', 2)
+  c.get('a') // bump a → b is now LRU
+  c.set('c', 3) // evicts b
+  assert.equal(c.get('b'), undefined)
+  assert.equal(c.get('a'), 1)
+  assert.equal(c.get('c'), 3)
 })
