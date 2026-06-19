@@ -245,9 +245,23 @@ typecheck ✅ · selftest 133 ✅.
   어려움 → 본 작업에서 제외, 한계로 명시. (delegate 툴 스키마만 알려져 있고 ~350토큰으로 작다.)
 - `injectedTokens`는 cheap ~4 chars/token 추정(실 토크나이저 아님) — 내부 비교용으로만 신뢰.
 
-### 10.5 미수행 / 후속 (정직)
-- **Phase 2(렌더러)**: `injectedTokens`의 Cost 탭 노출 + **대화별 MCP/skill 스코핑 토글**(MCP tax 직격,
-  보고서 §5) — 클라우드 세션에서 라이브 검증 불가라 보류. 구현 시 "미검증" 표기 필요.
+### 10.5 Phase 2 구현 (2026-06-19, 렌더러 — 라이브 미검증)
+보고서 §5(MCP tax)·§9(occupancy)의 렌더러 측 작업을 완료. **클라우드 세션엔 키/GUI가 없어 렌더러
+*동작*은 미검증** — typecheck·build(렌더러 339모듈)·순수 코어 테스트로만 확인. 로컬 Electron 실행에서
+확인 필요(이 repo의 기존 렌더러 기능들과 동일한 정직 고지).
+
+1. **`injectedTokens` Cost 탭 노출** ✅ — Cost & Cache 대시보드에 "INJECTED CTX" 타일 추가(repo map +
+   memory가 차지하는 주입 토큰 합계). 순수 관측 — 추가 토큰 0.
+2. **대화별 MCP 스코핑** ✅ (보고서 §5 "MCP tax" 직격 레버) — 각 MCP 서버의 툴 정의가 매 턴 재전송되므로,
+   대화별로 *필요한 서버만* 로드하도록 선택. `RunOptions.mcpScope`(undefined ⇒ 전체, 기본 무변경) →
+   `toSdkMcpServers(scope)`가 `scopeMcpServers`(순수·테스트됨, `src/main/mcpScope.ts`)로 필터 → 채팅
+   컨트롤바의 `mcp` 토글 + 멀티셀렉트 모달. 선택은 per-tab 상태 + 세션별 localStorage 영속(model/effort/
+   persona override와 동일 패턴). 무거운 MCP 세트를 쓰는 사용자에게 O(n²) 재전송 비용 직접 절감.
+   delegate 툴(provider 게이트, ~350토큰)은 스코핑 대상 아님.
+
+### 10.6 미수행 / 후속 (정직)
 - **SDK 종속(차단)**: `clear_tool_uses` 컨텍스트 편집·툴서치·PTC는 Agent SDK가 옵션으로 노출하기 전엔 불가.
+- **skill 스코핑**: 이번엔 MCP 서버만. skill은 SDK가 트리거 시 본문을 로드(점진적 공개)라 메타데이터
+  (~100토큰/개)만 상시 비용 → 우선순위 낮음.
 - **제약 준수**: 본 작업은 보고서의 하드 제약("모델·노력 불변, 하니스 구조만 변경")을 지킨다 — thinking
   budget 캡·강제 모델 다운그레이드·서브에이전트 수 축소는 *하지 않았다*(품질 저하 레버라 제외).

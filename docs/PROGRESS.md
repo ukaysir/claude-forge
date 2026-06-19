@@ -183,7 +183,10 @@ Phase 0(settingSources) + 6개 기능 전부 EXTEND 탭에 출하. 코드로 확
   **라이브 실호출**: cost-saver ON + trivial 프롬프트 → 실제 haiku로 라우팅돼 응답 완료(위 live-smoke).
 - [~] **레버 3 (compaction)** — `auto-compact at 80%` 토글 존재(기존, Composer `ctxWindow` 80% 트리거) /
   플랜의 *가역 정책*(요약본↔원문 복원)은 미착수
-- [ ] **레버 2 (동적 tool 스코핑)** · **레버 5 (retrieval-first)** · **레버 6 (output 절감)** — 미착수
+- [x] **레버 2 (동적 tool 스코핑) — 대화별 MCP 스코핑 구현** ✅ (2026-06-19, TOKEN.md §10.5): `RunOptions.mcpScope`
+  → `toSdkMcpServers(scope)`(순수 `scopeMcpServers` 필터, 테스트 5) → 채팅 컨트롤 `mcp` 토글+모달, per-tab
+  영속. 무거운 MCP 세트의 매-턴 재전송 비용 직격. **렌더러 동작 미검증(클라우드 키/GUI 없음)** · build 339모듈 ✅.
+- [ ] **레버 5 (retrieval-first)** · **레버 6 (output 절감)** — 미착수
 - [x] **§10 (구조적 보고서 반영, 2026-06-19)** ✅ — Forge가 *실제로 소유한* 토큰만 줄임: goose `delegate`
   결과를 `capToolResult`(기본 8k)로 캡(라이브 O(n²) 방지) · subtaskRunner 컨텍스트 캡(잠재/라이브러리) ·
   주입 컨텍스트 `injectedTokens` 계측(데이터 레이어). SDK-제어 vs Forge-제어 레버 분류 + MCP occupancy

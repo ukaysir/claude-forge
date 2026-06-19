@@ -49,6 +49,14 @@ export interface RunOptions {
    * i.e. identical to current behavior. (docs/SQUAD_ORCHESTRATION.md §6)
    */
   agents?: Record<string, AgentDefinition>
+  /**
+   * Per-conversation MCP-server scope: the names of the configured MCP servers to
+   * load for THIS run. Each tool definition is re-sent every turn (the "MCP tax",
+   * docs/TOKEN_OPTIMIZATION.md §10 / report §5), so scoping a conversation to only
+   * the servers it needs trims per-turn input tokens. Omitted ⇒ ALL servers load
+   * (default, zero behavior change); `[]` ⇒ none.
+   */
+  mcpScope?: string[]
 }
 
 export interface SessionInfo {

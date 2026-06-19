@@ -75,8 +75,11 @@ export async function runStreaming(
   if (skills) options.skills = skills
 
   // MCP (roadmap #4): Forge owns these connections (configured in the EXTEND
-  // console), passed programmatically rather than via project `.claude/`.
-  const mcpServers = await toSdkMcpServers()
+  // console), passed programmatically rather than via project `.claude/`. The
+  // per-conversation scope (opts.mcpScope) trims which servers load this run so a
+  // chat doesn't pay the per-turn tool-definition tax for servers it never uses
+  // (docs/TOKEN_OPTIMIZATION.md §10); undefined ⇒ all (unchanged default).
+  const mcpServers = await toSdkMcpServers(opts.mcpScope)
 
   // Free-provider delegation (docs/GOOSE_INTEGRATION.md): when ≥1 provider is
   // enabled, expose the in-process `delegate` tool so the orchestrator can offload
