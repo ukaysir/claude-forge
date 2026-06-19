@@ -85,3 +85,23 @@ output — the same task at a fraction of the tokens.
   the actual recall quality, injection effect on real runs, and the renderer
   panels were not exercised against a live model. Wiring is type-safe and builds;
   behavior needs a local Electron run to confirm.
+
+## Forge-owned tool-result cap — `capToolResult` (2026-06-19)
+
+The compression core gained `capToolResult(text, maxTokens=8000, label)` +
+`FORGE_CONTEXT_TOKEN_CAP` (single tunable source of truth). It is the one place
+Forge can enforce the report's "bound large observations / keep tool responses
+under 25k tokens" rule, since the SDK's own tool results are out of reach — only
+**Forge-constructed** context flows through it:
+
+- **Live**: the goose `delegate` result (`goose/delegateTool.ts`) — previously an
+  unbounded free-model dump re-sent every turn (O(n²)); now capped marked-lossy.
+- **Latent**: the orchestration blackboard context (`agent/subtaskRunner.ts`) —
+  the conductor engine is a selftest-only library with no runtime caller, so this
+  is a zero-cost consistency fix for when/if it is wired up.
+- **Metric**: per-run `injectedTokens` (repo-map + memory) now persists to
+  `AgentActivity` (data layer; Cost-tab surfacing is a deferred renderer task).
+
+Pure + tested (`npm run test`, 58 assertions). See `docs/TOKEN_OPTIMIZATION.md`
+§10 for the full SDK-controlled-vs-Forge-controlled lever taxonomy and honest
+limits (MCP tool-definition occupancy is not measurable from Forge).

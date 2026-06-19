@@ -7,7 +7,9 @@ import assert from 'node:assert/strict'
 import {
   estimateTokens,
   compressText,
-  compressContext
+  compressContext,
+  capToolResult,
+  FORGE_CONTEXT_TOKEN_CAP
 } from '../src/main/efficiency/compress'
 
 // ── compress.ts (headroom) ───────────────────────────────────────────────────
@@ -79,4 +81,35 @@ test('compressContext: drops empty parts', () => {
   const r = compressContext([{ label: 'a', text: '' }, { label: 'b', text: 'hi' }], 0)
   assert.ok(!r.text.includes('## a'))
   assert.match(r.text, /## b/)
+})
+
+// ── capToolResult (Forge-owned tool-result / context cap) ────────────────────
+test('capToolResult: under cap passes through without a trim header', () => {
+  const r = capToolResult('short answer', undefined, 'delegated result')
+  assert.equal(r.truncated, false)
+  assert.equal(r.text, 'short answer')
+  assert.ok(!/Forge trimmed/.test(r.text))
+})
+
+test('capToolResult: over cap elides and prepends a self-describing header', () => {
+  const huge = Array.from({ length: 5000 }, (_, i) => `detail line ${i} ${'.'.repeat(30)}`).join('\n')
+  const r = capToolResult(huge, 200, 'delegated result')
+  assert.ok(r.truncated)
+  assert.ok(r.originalTokens > r.tokens, 'should shrink')
+  assert.ok(r.tokens <= 260, `expected ~<=200 tokens, got ${r.tokens}`)
+  assert.match(r.text, /Forge trimmed this delegated result/)
+  assert.match(r.text, /elided by Forge compression/)
+})
+
+test('capToolResult: default cap is the shared 8k constant', () => {
+  assert.equal(FORGE_CONTEXT_TOKEN_CAP, 8000)
+  // A blob just under the cap is not truncated at the default.
+  const justUnder = 'x'.repeat((FORGE_CONTEXT_TOKEN_CAP - 100) * 4)
+  assert.equal(capToolResult(justUnder).truncated, false)
+})
+
+test('capToolResult: empty input is safe', () => {
+  const r = capToolResult('')
+  assert.equal(r.text, '')
+  assert.equal(r.truncated, false)
 })

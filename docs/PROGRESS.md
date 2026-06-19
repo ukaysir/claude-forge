@@ -184,6 +184,10 @@ Phase 0(settingSources) + 6개 기능 전부 EXTEND 탭에 출하. 코드로 확
 - [~] **레버 3 (compaction)** — `auto-compact at 80%` 토글 존재(기존, Composer `ctxWindow` 80% 트리거) /
   플랜의 *가역 정책*(요약본↔원문 복원)은 미착수
 - [ ] **레버 2 (동적 tool 스코핑)** · **레버 5 (retrieval-first)** · **레버 6 (output 절감)** — 미착수
+- [x] **§10 (구조적 보고서 반영, 2026-06-19)** ✅ — Forge가 *실제로 소유한* 토큰만 줄임: goose `delegate`
+  결과를 `capToolResult`(기본 8k)로 캡(라이브 O(n²) 방지) · subtaskRunner 컨텍스트 캡(잠재/라이브러리) ·
+  주입 컨텍스트 `injectedTokens` 계측(데이터 레이어). SDK-제어 vs Forge-제어 레버 분류 + MCP occupancy
+  측정 불가 한계를 TOKEN.md §10에 정직 기록. 순수+테스트(efficiency.test 58) · typecheck · selftest 133 ✅.
 - [ ] **§5 구독 반증**: 캐싱/라우팅이 구독 rate-limit을 못 줄이면 → 레버 1·4를 *지연 개선*으로 강등 (미측정)
 
 > 정적 게이트: typecheck ✅ · build ✅(렌더러 307모듈 — `routing.ts` 렌더러 번들에 깔끔히 포함) ·

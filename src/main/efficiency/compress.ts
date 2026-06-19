@@ -197,6 +197,52 @@ export function compressText(input: string, options: CompressOptions = {}): Comp
   }
 }
 
+/**
+ * Default ceiling for a Forge-CONSTRUCTED tool result / context blob that gets
+ * carried in the prompt. The report's guidance is "keep tool responses under
+ * 25,000 tokens"; Forge uses a tighter 8k default because such a result is then
+ * re-sent on every subsequent turn (the O(n²) re-billing cost dominates), and a
+ * delegated free-model answer rarely needs more than this. Tunable — the single
+ * source of truth for the cap so callers don't hard-code their own number.
+ */
+export const FORGE_CONTEXT_TOKEN_CAP = 8000
+
+export interface CapResult {
+  text: string
+  /** True when the input exceeded the cap and was head/tail-elided. */
+  truncated: boolean
+  /** Token estimate of the returned text (after any compression). */
+  tokens: number
+  /** Token estimate of the original input (before compression). */
+  originalTokens: number
+}
+
+/**
+ * Cap a Forge-OWNED tool result / context blob to a token budget, marked-lossy.
+ * This is the one place Forge can apply the report's "bound large observations"
+ * rule, since the SDK's own tool results (Read/Bash/…) are out of reach — only
+ * the context Forge itself constructs (the goose `delegate` result, orchestration
+ * blackboard context) flows through here. Always squeezes (dedup/whitespace);
+ * only head/tail-elides above `maxTokens`. When trimmed, a one-line header tells
+ * the model the blob was shortened so it can re-request a specific part.
+ */
+export function capToolResult(
+  text: string,
+  maxTokens: number = FORGE_CONTEXT_TOKEN_CAP,
+  label = 'result'
+): CapResult {
+  const r = compressText(text, { maxTokens })
+  const out = r.truncated
+    ? `[Forge trimmed this ${label} from ~${r.originalTokens} to ~${r.compressedTokens} tokens to keep context small; ask again for a specific part if you need more.]\n${r.text}`
+    : r.text
+  return {
+    text: out,
+    truncated: r.truncated,
+    tokens: estimateTokens(out),
+    originalTokens: r.originalTokens
+  }
+}
+
 export interface ContextPart {
   /** Short label rendered as a section header (e.g. "memory", "repo map"). */
   label: string

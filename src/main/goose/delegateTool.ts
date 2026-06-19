@@ -8,6 +8,7 @@
 
 import { z } from 'zod'
 import { createSdkMcpServer, tool } from '@anthropic-ai/claude-agent-sdk'
+import { capToolResult } from '../efficiency/compress'
 import { enabledProviders } from '../providers'
 import { orderProviders, type DelegateTier } from '../routing'
 import { getRole } from '../roles'
@@ -99,7 +100,16 @@ export function buildDelegateServer(cwd: string, runId: string) {
           })
           noteProviderResult(id, true)
           gooseSubtaskFinish(activityId, 'ok', { tokensUsed: res.tokensUsed })
-          const text = res.output || '(the sub-agent returned no text)'
+          // Cap the delegated result before it enters the main agent's context:
+          // it is a Forge-OWNED tool result that gets re-sent every subsequent
+          // turn (O(n²)), so an unbounded free-model dump is the one tool-result
+          // bloat Forge can actually fix (the report's "bound large observations"
+          // / "<25k tokens" rule). Marked-lossy; only bites above the cap.
+          const text = capToolResult(
+            res.output || '(the sub-agent returned no text)',
+            undefined,
+            'delegated result'
+          ).text
           return {
             content: [{ type: 'text' as const, text: `[delegated → ${res.model}]\n\n${text}` }]
           }
