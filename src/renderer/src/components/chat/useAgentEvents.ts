@@ -83,21 +83,34 @@ export function useAgentEvents(refs: AgentEventRefs): {
       raf = null
       if (!pending.length) return
       const evs = pending.splice(0)
-      setTurns((prev) =>
-        prev.map((t) => {
+      // Only the run(s) these events belong to can change — in a long transcript
+      // that's the one active turn, not all N. Pre-collect the affected runIds so
+      // unaffected turns short-circuit on a cheap Set lookup (no inner event loop,
+      // no new object). And if nothing actually changed (e.g. a duplicate
+      // block-start), return the SAME array so React skips the whole Composer
+      // re-render + todo derivation for that frame. docs/PERFORMANCE.md lever 6.
+      const affected = new Set<string>()
+      for (const e of evs) affected.add(e.runId)
+      setTurns((prev) => {
+        let mutated = false
+        const next = prev.map((t) => {
+          if (!affected.has(t.id)) return t
           let blocks = t.blocks
           let changed = false
           for (const e of evs) {
             if (e.runId !== t.id) continue
-            const next = reduceBlocks(blocks, e)
-            if (next !== blocks) {
-              blocks = next
+            const nb = reduceBlocks(blocks, e)
+            if (nb !== blocks) {
+              blocks = nb
               changed = true
             }
           }
-          return changed ? { ...t, blocks } : t
+          if (!changed) return t
+          mutated = true
+          return { ...t, blocks }
         })
-      )
+        return mutated ? next : prev
+      })
     }
     const unsub = window.forge.agent.onEvent((ev) => {
       if (!ownedRef.current.has(ev.runId)) return

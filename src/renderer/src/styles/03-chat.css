@@ -471,6 +471,25 @@
   display: flex;
   flex-direction: column;
   margin-bottom: 18px;
+  /* Render-windowing (docs/PERFORMANCE.md lever 6, long-session lag): let the
+     browser skip layout/style/paint for turns scrolled off-screen instead of
+     keeping the whole transcript live. Off-screen turns cost ~nothing, so render
+     work stops scaling with conversation length. `auto` remembers each turn's
+     last-rendered height (stable scrollbar after it's been seen once); the
+     720px fallback is the placeholder before first paint. Cheaper + lower-risk
+     than react-window (no autoscroll/height-measure regression; search & copy
+     still see every turn — content-visibility hides nothing from the DOM). */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
+}
+/* Same windowing for the restored-history items (a long resumed conversation
+   renders all of them up front). They're flat children of .history. */
+.history > .user-msg,
+.history > .response,
+.history > .thinking,
+.history > .tool-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
 }
 .turn > .response,
 .turn > .thinking,

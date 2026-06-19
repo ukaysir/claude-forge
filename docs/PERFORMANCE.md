@@ -184,4 +184,35 @@ renderer lint 0). 당시 `App.tsx` 단일 파일에 적용했고, 이후 `docs/M
 - **Phase 0 CDP 베이스라인 + 전/후 수치(§5) 미채집.** 라이브 앱 + 구독 세션 필요 → 사용자 우선순위 낮춤.
   즉 레버들은 **코드 근거(§0 병목)와 정적 게이트**로만 검증됨; 프레임타임·input-to-paint의 정량 전/후
   비교는 아직 없음. 재개 시 첫 할 일: prod 빌드 + `--remote-debugging-port=9222`로 골든 입력 실측.
+
+---
+
+## 9. 긴 세션 렉 — Phase 4 착수 (2026-06-19)
+
+**증상(사용자 보고):** "대화가 엄청 길어지거나 오래 사용하면 누수가 생긴 것처럼 렉." → §0의 **B9(가상화
+없음, 긴 세션 한정)**가 바로 이것. 비용이 *대화 길이에 비례*해 커지는 경로들(렌더 + 프레임당 JS)을 잡았다.
+**메모리 누수(타이머/리스너/구독)는 별도 정밀 점검 결과 깨끗**(모든 useEffect cleanup·unsub 쌍 존재, 메인의
+`agentActivity` history는 200캡) — 체감 "누수"의 정체는 누적 렌더 비용이었다.
+
+### 적용 레버 (신규 의존성 0)
+- **레버 6 (렌더 윈도잉) ✅ — react-window 없이 `content-visibility`로.** `.turn`(+복원 히스토리 항목)에
+  `content-visibility: auto; contain-intrinsic-size: auto 720px`(`styles/03-chat.css`). 화면 밖 turn의
+  레이아웃/스타일/페인트를 브라우저가 **건너뜀** → 렌더 비용이 대화 길이에 비례하지 않음. §1.2·§4가 우려한
+  가변높이+autoscroll 회귀가 없고(DOM에서 숨기지 않으므로 검색·복사·스크롤 그대로), `auto` 키워드가
+  본 적 있는 turn의 높이를 기억해 스크롤바도 안정. **긴 세션 렉의 주범 직격.**
+- **rAF flush 타깃팅 ✅ (`useAgentEvents.ts`).** 프레임당 `prev.map`이 **전 turn**에 inner 이벤트 루프를
+  돌던 것을, 이벤트의 runId 집합만 reduce하도록 변경(나머지는 Set 조회로 단락). 또 **실변경 없으면 같은
+  배열 반환** → 중복 block-start 등 no-op 프레임에서 Composer 전체 재렌더 + todo 재계산 스킵.
+- **`deriveTasks` 증분화 ✅ (`lib/blocks.ts`).** 매 스트리밍 프레임마다 전 트랜스크립트를 regex+JSON.parse로
+  재스캔하던 것을, **turn별 task-op 추출을 `WeakMap<Turn, TaskOp[]>`로 캐시**. 완료 turn은 ref 안정 →
+  1회만 추출, 활성 turn(프레임마다 새 ref)만 재추출. 비용이 활성 turn 1개로 축소(전체 X). 동작 동일
+  (op 순서·upsert 보존; 기존 `npm run test` 75개 통과로 확인).
+- **검색 필터 메모이제이션 ✅ (`useTranscriptSearch.ts`).** `shownTurns`의 `turnText()` flatten을
+  `useMemo([q, turns])`로 — 무관한 Composer 렌더마다 전 turn 재스캔하지 않음(빈 쿼리는 `turns` 그대로).
+
+### 게이트
+- `typecheck` ✅ · `npm run test` 75/75 ✅ · `npm run build` ✅ · renderer lint(변경 파일) 0.
+- **정직한 한계(§5 동일):** CDP 프레임타임 전/후 정량 비교는 여전히 미채집(클라우드 세션엔 라이브 앱/키
+  없음). 레버는 코드 근거 + 정적 게이트로 검증됨. 로컬 prod 빌드 + `FORGE_CDP=9222`로 긴 대화(수백 turn)에서
+  스크롤·스트리밍 프레임타임 실측 권장.
 </content>
