@@ -15,6 +15,80 @@ function normTaskStatus(s: string): Todo['status'] {
  *  - TaskUpdate input { taskId, status, subject? }                 → mutate task
  *  - TaskList result "#<id> [<status>] <subject>" (per line)       → snapshot sync
  */
+// A single task mutation distilled from one tool block. Extracting these (the
+// regex + JSON.parse work) is the only per-block cost; replaying them into the
+// task map is cheap. See deriveTasks for why this split matters.
+type TaskOp =
+  | { op: 'create'; id: string; content: string; activeForm: string | undefined }
+  | { op: 'update'; id: string; status?: Todo['status']; content?: string; activeForm?: string }
+  | { op: 'delete'; id: string }
+  | { op: 'list'; entries: { id: string; content: string; status: Todo['status'] }[] }
+
+// Per-turn extracted task ops, cached by Turn identity. A completed turn keeps a
+// stable object ref, so its ops are extracted once and reused on every later
+// call; only the active streaming turn (a fresh ref each rAF flush) is
+// re-extracted. The WeakMap lets superseded streaming snapshots be GC'd, and
+// turns with no Task tools cache an empty array (so they skip the scan next
+// time). This makes deriveTasks scale with the active turn, not the whole
+// transcript — the long-conversation cost in docs/PERFORMANCE.md. Behavior is
+// identical to the previous single-pass scan (same op order, same upserts).
+const taskOpsCache = new WeakMap<Turn, TaskOp[]>()
+
+function extractTaskOps(turn: Turn): TaskOp[] {
+  const cached = taskOpsCache.get(turn)
+  if (cached) return cached
+  const ops: TaskOp[] = []
+  for (const b of turn.blocks) {
+    if (b.kind !== 'tool') continue
+    if (b.name === 'TaskCreate') {
+      const m = /Task #(\d+) created successfully:\s*([\s\S]+)/.exec(b.result ?? '')
+      if (m) {
+        let activeForm: string | undefined
+        try {
+          activeForm = (JSON.parse(b.inputRaw) as { activeForm?: string }).activeForm
+        } catch {
+          /* still streaming */
+        }
+        ops.push({ op: 'create', id: m[1], content: m[2].trim(), activeForm })
+      }
+    } else if (b.name === 'TaskUpdate') {
+      try {
+        const inp = JSON.parse(b.inputRaw) as {
+          taskId?: string | number
+          status?: string
+          subject?: string
+          activeForm?: string
+        }
+        if (inp.taskId != null) {
+          const id = String(inp.taskId)
+          if (inp.status === 'deleted') {
+            ops.push({ op: 'delete', id })
+          } else {
+            ops.push({
+              op: 'update',
+              id,
+              ...(inp.status ? { status: normTaskStatus(inp.status) } : {}),
+              ...(inp.subject ? { content: inp.subject } : {}),
+              ...(inp.activeForm ? { activeForm: inp.activeForm } : {})
+            })
+          }
+        }
+      } catch {
+        /* partial JSON mid-stream */
+      }
+    } else if (b.name === 'TaskList') {
+      const entries: { id: string; content: string; status: Todo['status'] }[] = []
+      for (const line of (b.result ?? '').split('\n')) {
+        const m = /^#(\d+)\s+\[([a-z_]+)\]\s+([\s\S]+)$/.exec(line.trim())
+        if (m) entries.push({ id: m[1], content: m[3].trim(), status: normTaskStatus(m[2]) })
+      }
+      if (entries.length) ops.push({ op: 'list', entries })
+    }
+  }
+  taskOpsCache.set(turn, ops)
+  return ops
+}
+
 export function deriveTasks(turns: Turn[]): Todo[] {
   type T = Todo & { id: string }
   const map = new Map<string, T>()
@@ -34,49 +108,21 @@ export function deriveTasks(turns: Turn[]): Todo[] {
     }
   }
   for (const turn of turns) {
-    for (const b of turn.blocks) {
-      if (b.kind !== 'tool') continue
-      if (b.name === 'TaskCreate') {
-        const m = /Task #(\d+) created successfully:\s*([\s\S]+)/.exec(b.result ?? '')
-        if (m) {
-          let activeForm: string | undefined
-          try {
-            activeForm = (JSON.parse(b.inputRaw) as { activeForm?: string }).activeForm
-          } catch {
-            /* still streaming */
-          }
-          upsert(m[1], { content: m[2].trim(), activeForm })
-        }
-      } else if (b.name === 'TaskUpdate') {
-        try {
-          const inp = JSON.parse(b.inputRaw) as {
-            taskId?: string | number
-            status?: string
-            subject?: string
-            activeForm?: string
-          }
-          if (inp.taskId != null) {
-            const id = String(inp.taskId)
-            if (inp.status === 'deleted') {
-              map.delete(id)
-              const i = order.indexOf(id)
-              if (i >= 0) order.splice(i, 1)
-            } else {
-              upsert(id, {
-                ...(inp.status ? { status: normTaskStatus(inp.status) } : {}),
-                ...(inp.subject ? { content: inp.subject } : {}),
-                ...(inp.activeForm ? { activeForm: inp.activeForm } : {})
-              })
-            }
-          }
-        } catch {
-          /* partial JSON mid-stream */
-        }
-      } else if (b.name === 'TaskList') {
-        for (const line of (b.result ?? '').split('\n')) {
-          const m = /^#(\d+)\s+\[([a-z_]+)\]\s+([\s\S]+)$/.exec(line.trim())
-          if (m) upsert(m[1], { content: m[3].trim(), status: normTaskStatus(m[2]) })
-        }
+    for (const o of extractTaskOps(turn)) {
+      if (o.op === 'create') {
+        upsert(o.id, { content: o.content, activeForm: o.activeForm })
+      } else if (o.op === 'update') {
+        const patch: Partial<T> = {}
+        if (o.status) patch.status = o.status
+        if (o.content) patch.content = o.content
+        if (o.activeForm) patch.activeForm = o.activeForm
+        upsert(o.id, patch)
+      } else if (o.op === 'delete') {
+        map.delete(o.id)
+        const i = order.indexOf(o.id)
+        if (i >= 0) order.splice(i, 1)
+      } else {
+        for (const e of o.entries) upsert(e.id, { content: e.content, status: e.status })
       }
     }
   }

@@ -1,7 +1,7 @@
 // Transcript search for the composer (Cmd/Ctrl+F filters the open conversation).
 // Extracted from Composer.tsx (behavior-preserving). Gated on `isActive` so the
 // global keydown only fires for the visible tab (all tabs stay mounted).
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Turn } from '../../types'
 import { turnText } from '../../lib/composer'
 
@@ -42,6 +42,12 @@ export function useTranscriptSearch(turns: Turn[], isActive: boolean): Transcrip
   }, [searchOpen, isActive])
 
   const q = search.trim().toLowerCase()
-  const shownTurns = q ? turns.filter((t) => turnText(t).includes(q)) : turns
+  // Memoized so the per-turn turnText() flatten only re-runs when the query or the
+  // transcript actually changes — not on every unrelated Composer render. When the
+  // query is empty this is the identity `turns` (no allocation, no scan).
+  const shownTurns = useMemo(
+    () => (q ? turns.filter((t) => turnText(t).includes(q)) : turns),
+    [q, turns]
+  )
   return { search, setSearch, searchOpen, setSearchOpen, searchRef, q, shownTurns }
 }
