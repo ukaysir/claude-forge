@@ -44,8 +44,8 @@ export function useGoalLoop(opts: {
       setGoal({ objective, iter: 1, max, spent: 0, budget })
       processedTurnRef.current = null
       pushNotice(
-        '🎯 /goal',
-        `Goal set — running autonomously until complete (max ${max} iteration${max === 1 ? '' : 's'} · budget $${budget.toFixed(0)}).\n\nObjective: ${objective}`
+        '/goal',
+        `Goal set. Running autonomously until complete (max ${max} iteration${max === 1 ? '' : 's'} · budget $${budget.toFixed(0)}).\n\nObjective: ${objective}`
       )
       void sendRef.current?.(objective)
     },
@@ -56,7 +56,7 @@ export function useGoalLoop(opts: {
     const g = goalRef.current
     setGoal(null)
     if (runIdRef.current) void window.forge.agent.interrupt(runIdRef.current)
-    if (g) pushNotice('🎯 /goal', `Goal stopped after ${g.iter} iteration${g.iter === 1 ? '' : 's'}.`)
+    if (g) pushNotice('/goal', `Goal stopped after ${g.iter} iteration${g.iter === 1 ? '' : 's'}.`)
   }, [pushNotice, runIdRef, setGoal])
 
   const resetGoal = useCallback((): void => {
@@ -78,7 +78,7 @@ export function useGoalLoop(opts: {
 
     if (last.meta?.error) {
       setGoal(null)
-      pushNotice('🎯 /goal', `Goal stopped — the last run errored: ${last.meta.error}`)
+      pushNotice('/goal', `Goal stopped. The last run errored: ${last.meta.error}`)
       return
     }
     const answer = last.blocks
@@ -88,7 +88,7 @@ export function useGoalLoop(opts: {
     if (goalAchieved(answer)) {
       setGoal(null)
       pushNotice(
-        '🎯 /goal',
+        '/goal',
         `✓ Goal achieved in ${g.iter} iteration${g.iter === 1 ? '' : 's'} ($${spent.toFixed(2)}).`
       )
       return
@@ -96,16 +96,16 @@ export function useGoalLoop(opts: {
     if (spent >= g.budget) {
       setGoal(null)
       pushNotice(
-        '🎯 /goal',
-        `Reached the $${g.budget.toFixed(0)} budget ($${spent.toFixed(2)} spent) without GOAL_ACHIEVED. Stopping — raise "max $/run" in LIMITS and run /goal again to continue.`
+        '/goal',
+        `Reached the $${g.budget.toFixed(0)} budget ($${spent.toFixed(2)} spent) without GOAL_ACHIEVED. Stopping. Raise "max $/run" in LIMITS and run /goal again to continue.`
       )
       return
     }
     if (g.iter >= g.max) {
       setGoal(null)
       pushNotice(
-        '🎯 /goal',
-        `Reached the ${g.max}-iteration cap ($${spent.toFixed(2)} spent) without GOAL_ACHIEVED. Stopping — run /goal again to keep going.`
+        '/goal',
+        `Reached the ${g.max}-iteration cap ($${spent.toFixed(2)} spent) without GOAL_ACHIEVED. Stopping. Run /goal again to keep going.`
       )
       return
     }

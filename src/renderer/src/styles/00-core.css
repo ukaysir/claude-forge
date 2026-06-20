@@ -159,8 +159,8 @@ body,
   color: var(--amber-bright);
 }
 .tb-btn.close:hover {
-  background: #c0392b;
-  color: #fff;
+  background: #c0392b; /* sanctioned literal: vivid OS close-red (see DESIGN.md §2) */
+  color: var(--text);
 }
 
 /* ---- custom scrollbars ---- */

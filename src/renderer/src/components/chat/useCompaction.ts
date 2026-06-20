@@ -66,7 +66,7 @@ export function useCompaction(opts: {
       const r = await window.forge.agent.compact(sid, workspaceId)
       if (r.ok) {
         onSessionRef.current(r.sessionId)
-        pushNotice('⟲ /compact', '✓ Context compacted — older messages summarized.')
+        pushNotice('⟲ /compact', '✓ Context compacted. Older messages summarized.')
         setContextTokens(0)
       } else {
         pushNotice('⟲ /compact', `Compact failed${r.error ? ': ' + r.error : ''}`)

@@ -154,9 +154,9 @@ Overlays dim the backdrop with `rgba(0,0,0,0.45–0.55)`; the palette and drop o
 - **24×24 viewBox grid**, `fill="none"`, `stroke="currentColor"`, **`strokeWidth={1.75}`**, round caps + joins
 - sizes to `1em` and inherits `currentColor` (`.icon` class in `00-core.css`, `vertical-align: -0.14em`), so every icon picks up the surrounding text color and stays on-theme automatically
 
-**Icon names** (the `IconName` union): `chat`, `squad`, `extend`, `skills`, `commands`, `hooks`, `mcp`, `agents`, `plugins`, `bolt`, `tool`, `guide`, `cost`.
+**Icon names** (the `IconName` union): `chat`, `squad`, `extend`, `skills`, `commands`, `hooks`, `mcp`, `agents`, `plugins`, `bolt`, `tool`, `guide`, `cost`, `theme`, `thinking`, `inspect`, `upgrade`, `target`, `scale`, `file`, `pet`.
 
-**Hard rule: no multicolor emoji in the UI.** This icon set explicitly replaced the old `🧩 ⌨ 🪝 🔌 🤖 📦 ⚡` emoji that ignored the palette (see the file header comment). The only sanctioned glyph-marks are the brand `⚒` and the cost `⛁` (§1) — and those render in a theme color via `currentColor`. New iconography goes through `Icon.tsx`; add a path to `PATHS`, don't drop in an emoji.
+**Hard rule: no multicolor emoji in the UI.** This icon set explicitly replaced the old `🧩 ⌨ 🪝 🔌 🤖 📦 ⚡` emoji that ignored the palette (see the file header comment). The only sanctioned glyph-marks are the brand `⚒` and the cost `⛁` (§1) — and those render in a theme color via `currentColor`. The functional icons `target` (goal banner), `scale` (LLM-judge verifier, paired with `tool` for the tool-oracle verifier), `file` (attached file), and `pet` (desktop-pet toggle) likewise replaced the former `🎯 / ⚖ / 🔧 / 🗎 / 🦀` emoji. New iconography goes through `Icon.tsx`; add a path to `PATHS`, don't drop in an emoji. (Monochrome dingbats that inherit `currentColor` — `☑ ◐ ☐ ★ ☆ ✎ ✕ ⚙ ⟲ ⭳ ✦` and the semantic `⚠` warning glyph — remain acceptable inline; the hard ban is specifically on *multicolor* emoji.)
 
 ---
 
@@ -300,6 +300,7 @@ See **Modals** above — `ConfirmDialog.tsx` is the reference implementation (ov
 
 **Don't**
 - Don't add **multicolor emoji** to the UI — only the sanctioned brand `⚒` and cost `⛁` glyphs, plus `Icon.tsx` line icons.
+- Don't use **em-dashes (`—`) or en-dashes (`–`) in user-facing copy** (labels, notices, tooltips, slash-command help, exported Markdown, the Guide). It's the #1 "AI tell" per the `design-taste` skill. Use a colon for label/description pairs, a period or comma to split clauses, or parentheses for asides. Plain hyphen `-` only (compounds, ranges, empty-value placeholders). Code comments are exempt.
 - Don't reintroduce **loud orange / saturated accents** — the accent is intentionally a low-chroma warm gray. Keep washes subtle (`0.05–0.16` alpha).
 - Don't ship **native OS chrome** (raw `<select>` chevrons, spin buttons, `confirm()` dialogs) — they ignore the theme and break cross-platform consistency.
 - Don't use **`height: 100%`** for flex-fill children (Chromium percentage-height fragility).

@@ -89,7 +89,7 @@ export default function ConversationSearch({
             </button>
           ))}
         </div>
-        <div className="cs-foot">Local search — reads stored transcripts only, no tokens.</div>
+        <div className="cs-foot">Local search. Reads stored transcripts only, no tokens.</div>
       </div>
     </div>
   )

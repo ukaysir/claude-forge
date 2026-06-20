@@ -23,6 +23,7 @@ import { route, resolveModelId } from '../../../../main/routing'
 import { deriveTasks, parseTodos } from '../../lib/blocks'
 import { conversationToJson, conversationToMarkdown } from '../../lib/export'
 import { activityLabel } from '../../lib/composer'
+import Icon from '../Icon'
 import { goalDirective } from '../../lib/goal'
 import { handleSlashCommand } from '../../lib/slashCommands'
 import { useAgentEvents } from './useAgentEvents'
@@ -676,9 +677,9 @@ export default function Composer({
           costSaver={costSaver}
         />
         {goal && (
-          <div className="goal-banner" title="Autonomous goal loop — runs until the objective verifies">
+          <div className="goal-banner" title="Autonomous goal loop: runs until the objective verifies">
             <span className="goal-spinner" aria-hidden />
-            <span className="goal-mark">🎯</span>
+            <span className="goal-mark"><Icon name="target" /></span>
             <span className="goal-label">GOAL</span>
             <span className="goal-obj">{goal.objective}</span>
             <span className="goal-iter">
@@ -690,7 +691,7 @@ export default function Composer({
           </div>
         )}
         {!running && detectedModes.length > 0 && (
-          <div className="mode-chips" title="Magic-keyword modes detected in your message — they activate on send">
+          <div className="mode-chips" title="Magic-keyword modes detected in your message: they activate on send">
             {detectedModes.map((m) => (
               <span className={`mode-chip ${m.action}`} key={m.name}>
                 <span className="mode-chip-name">{m.name}</span>
@@ -764,10 +765,10 @@ export default function Composer({
             <div className="help-note">
               <b>/goal</b> runs autonomously: it loops the conversation, resuming the session each
               turn until the agent reports the objective complete (or the iteration cap). A banner
-              over the composer shows progress — stop it any time.
+              over the composer shows progress. Stop it any time.
             </div>
             <div className="help-note">
-              Plus Claude commands (/usage, /cost, /compact…) and your skills — type / to browse.
+              Plus Claude commands (/usage, /cost, /compact…) and your skills. Type / to browse.
               Interactive-only commands like /login or /agents aren't available in this environment.
             </div>
             <div className="modal-actions">

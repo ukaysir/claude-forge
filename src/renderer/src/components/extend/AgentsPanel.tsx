@@ -84,7 +84,7 @@ export default function AgentsPanel(): JSX.Element {
           </div>
           <div className="skills-empty-title">No subagents yet</div>
           <div className="skills-empty-desc">
-            Create a named agent with its own system prompt — reusable for delegated subtasks.
+            Create a named agent with its own system prompt, reusable for delegated subtasks.
           </div>
         </div>
       ) : (

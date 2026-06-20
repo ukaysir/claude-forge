@@ -8,7 +8,7 @@ type View = 'chat' | 'squad' | 'cost' | 'extend' | 'guide' | 'theme'
 
 // 실제 keywords.ts(MODES)와 일치. name = 채팅에 그대로 입력하는 트리거.
 const KEYWORDS: { name: string; kind: string; desc: string }[] = [
-  { name: 'ralph', kind: 'loop', desc: '목표가 완전히 검증될 때까지 반복 수행 — 부분 결과에서 멈추지 않음.' },
+  { name: 'ralph', kind: 'loop', desc: '목표가 완전히 검증될 때까지 반복 수행. 부분 결과에서 멈추지 않음.' },
   { name: 'autopilot', kind: 'loop', desc: '전체 계획을 멈춤 없이 끝까지 자율 실행 (별칭: fullsend, full auto).' },
   { name: 'ultrawork', kind: 'parallel', desc: '독립적인 작업으로 쪼개 병렬로 펼쳐 처리 (별칭: ulw).' },
   { name: 'ultrathink', kind: 'reason', desc: '행동 전에 여러 관점에서 깊고 신중하게 추론.' },
@@ -52,7 +52,7 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
 
         <Section title="매직 키워드 모드 (채팅에 입력)">
           <p className="gd-p">
-            아래 단어를 평범한 채팅 메시지에 섞어 넣으면 해당 모드가 이번 실행에 켜집니다 — 추가 지시
+            아래 단어를 평범한 채팅 메시지에 섞어 넣으면 해당 모드가 이번 실행에 켜집니다. 추가 지시
             (때로는 모델 등급)가 위에 얹히고, 에이전트는 실제 도구와 권한 설정을 그대로 유지합니다.
             키워드가 감지되면 작성창 위에 칩이 떠서 발동될 것을 알려줍니다. 키워드를 단지{' '}
             <em>설명/질문</em>하거나 따옴표로 인용하면 오발동하지 않습니다(한국어·일본어 별칭도 인식).
@@ -67,7 +67,7 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
             ))}
           </div>
           <p className="gd-note">
-            예: “<em>ultrathink — 웹소켓이 왜 재연결 루프를 도나?</em>” 또는 “<em>ralph: 테스트
+            예: “<em>ultrathink: 웹소켓이 왜 재연결 루프를 도나?</em>” 또는 “<em>ralph: 테스트
             스위트 전부 통과시켜줘</em>”. 활성 모드를 끄려면 <code>cancelomc</code> / <code>stopomc</code>{' '}
             (또는 “normal mode”, ponytail은 “stop ponytail”)를 입력하세요.
           </p>
@@ -81,20 +81,20 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
           </p>
           <ul className="gd-ul">
             <li>
-              <code>/model &lt;name|id&gt;</code> — 모델 변경(별칭 또는 임의의 id). <code>/persona</code>,{' '}
+              <code>/model &lt;name|id&gt;</code>: 모델 변경(별칭 또는 임의의 id). <code>/persona</code>,{' '}
               <code>/model</code>은 <strong>현재 대화에만</strong> 적용됩니다.
             </li>
             <li>
-              <code>/effort &lt;auto|low|medium|high|xhigh|max&gt;</code> — 추론 강도 설정.
+              <code>/effort &lt;auto|low|medium|high|xhigh|max&gt;</code>: 추론 강도 설정.
             </li>
             <li>
-              <code>/permission &lt;plan|ask|auto-edit|yolo&gt;</code> (별칭 <code>/perm</code>) — 권한 모드.
+              <code>/permission &lt;plan|ask|auto-edit|yolo&gt;</code> (별칭 <code>/perm</code>): 권한 모드.
             </li>
             <li>
-              <code>/persona &lt;지시문|clear&gt;</code> — 이 대화의 페르소나(전역 설정 위에 덮어쓰기).
+              <code>/persona &lt;지시문|clear&gt;</code>: 이 대화의 페르소나(전역 설정 위에 덮어쓰기).
             </li>
             <li>
-              <code>/clear</code> (별칭 <code>/new</code>) — 새 대화 시작. <code>/help</code> — 명령 목록.
+              <code>/clear</code> (별칭 <code>/new</code>): 새 대화 시작. <code>/help</code>: 명령 목록.
             </li>
           </ul>
           <p className="gd-note">
@@ -109,16 +109,16 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
           <p className="gd-p">
             추론 강도는 <code>AUTO → LOW → MEDIUM → HIGH → XHIGH → MAX</code> 순으로 올라갑니다. 모델이
             지원하지 않는 등급은 자동으로 <code>AUTO</code>로 되돌아갑니다. <code>XHIGH</code> /{' '}
-            <code>MAX</code>는 “⚠ 토큰 사용량 많음” 경고가 함께 표시됩니다 — 어려운 문제에만 쓰세요.
+            <code>MAX</code>는 “⚠ 토큰 사용량 많음” 경고가 함께 표시됩니다. 어려운 문제에만 쓰세요.
           </p>
         </Section>
 
         <Section title="권한 모드">
           <ul className="gd-ul">
-            <li><strong>PLAN</strong> — 읽기 전용, 계획만 제안(파일을 바꾸지 않음).</li>
-            <li><strong>ASK</strong> — 도구 사용마다 승인 요청.</li>
-            <li><strong>AUTO-EDIT</strong> — 파일 편집은 자동 승인.</li>
-            <li><strong>YOLO</strong> — 모든 작업 자동 승인(주의해서 사용).</li>
+            <li><strong>PLAN</strong>: 읽기 전용, 계획만 제안(파일을 바꾸지 않음).</li>
+            <li><strong>ASK</strong>: 도구 사용마다 승인 요청.</li>
+            <li><strong>AUTO-EDIT</strong>: 파일 편집은 자동 승인.</li>
+            <li><strong>YOLO</strong>: 모든 작업 자동 승인(주의해서 사용).</li>
           </ul>
         </Section>
 
@@ -126,7 +126,7 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
           <p className="gd-p">
             최대 <strong>5개</strong>의 대화 탭을 동시에 열 수 있고, 각 탭은 <strong>독립된
             워크스페이스</strong>를 가집니다. 탭을 전환해도 백그라운드에서 스트리밍이 계속되므로, 한
-            작업이 도는 동안 다른 대화를 진행할 수 있습니다. <code>＋</code>(“새 대화 — 격리
+            작업이 도는 동안 다른 대화를 진행할 수 있습니다. <code>＋</code>(“새 대화: 격리
             워크스페이스”) 버튼으로 새 탭을 엽니다.
           </p>
         </Section>
@@ -157,12 +157,12 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
             <button className="gd-link" onClick={() => onGoto('squad')}>AGENTS</button> 탭은 실시간
             관측소입니다. 어시스턴트가 하위 에이전트(Task 도구)에게 일을 위임하거나 오케스트레이션
             모드를 돌리면 <strong>Live</strong>에 무엇을 얼마나 오래 하고 있는지 표시됩니다. 끝난
-            에이전트는 <strong>History</strong>(재시작해도 유지)로 들어가며 비용·소요시간과 — 오케스트
-            레이션 실행이라면 — 객관적 도구 오라클 🔧 또는 LLM 심판 ⚖로 검증됐는지 보여줍니다.
+            에이전트는 <strong>History</strong>(재시작해도 유지)로 들어가며 비용·소요시간과 (오케스트
+            레이션 실행이라면) 객관적 도구 오라클 또는 LLM 심판으로 검증됐는지 보여줍니다.
           </p>
         </Section>
 
-        <Section title="실행 상태 관찰 — 작업 스트립 · TASKS · 알림">
+        <Section title="실행 상태 관찰: 작업 스트립 · TASKS · 알림">
           <ul className="gd-ul">
             <li>
               <strong>작업 스트립:</strong> 실행 중 채팅 상단에 현재 동작을 평이한 말로 고정 표시(“Read
@@ -175,7 +175,7 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
             </li>
             <li>
               <strong>신뢰성 배너:</strong> “Retrying … attempt X/Y”, “⚠ Rate limit … 리셋 HH:MM”,
-              “✦ Context (auto-)compacted — XXk→YYk” 같은 일시 알림을 띄웁니다.
+              “✦ Context (auto-)compacted: XXk→YYk” 같은 일시 알림을 띄웁니다.
             </li>
           </ul>
         </Section>
@@ -192,7 +192,7 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
           <p className="gd-p">
             <button className="gd-link" onClick={() => onGoto('cost')}>COST</button> 탭은 모든 실행의
             지출·토큰 수와 <strong>프롬프트 캐시 적중률</strong>을 실행별 표로 집계합니다. 캐시 적중률은
-            가장 큰 비용 지렛대입니다(캐시 읽기는 신규 입력의 약 10%로 과금) — SDK가 이미 반환하는
+            가장 큰 비용 지렛대입니다(캐시 읽기는 신규 입력의 약 10%로 과금). SDK가 이미 반환하는
             데이터에서 무료로 수집되므로 추가 토큰이 들지 않습니다. 사이드바의 <strong>PLAN USAGE</strong>{' '}
             미터는 구독 사용 한도 막대와 리셋 시각을 따로 보여줍니다(COST 탭의 지출과는 별개).
           </p>
@@ -208,10 +208,10 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
 
         <Section title="워크스페이스 파일 & 리포지토리 맵">
           <p className="gd-p">
-            <code>⌗</code> 버튼(팔레트 “Workspace files (this conversation)…”)으로 “WORKSPACE — this
+            <code>⌗</code> 버튼(팔레트 “Workspace files (this conversation)…”)으로 “WORKSPACE: this
             conversation” 모달을 엽니다. <strong>Files</strong> 탭은 에이전트가 이 대화에서 만들거나 고친
             파일을 미리보기로 보여주고, <strong>Repo map</strong> 탭은 새 대화 시작 시 자동으로 앞에
-            붙는 <strong>리포지토리 맵</strong>(가장 많이 import되는 파일들의 구조 요약)을 보여줍니다 —
+            붙는 <strong>리포지토리 맵</strong>(가장 많이 import되는 파일들의 구조 요약)을 보여줍니다.
             덕분에 에이전트가 모든 파일을 뒤지지 않고도 코드베이스를 탐색합니다.
           </p>
         </Section>
@@ -237,7 +237,7 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
           </ul>
         </Section>
 
-        <Section title="EXTEND — 내 .claude 도구상자">
+        <Section title="EXTEND: 내 .claude 도구상자">
           <p className="gd-p">
             <button className="gd-link" onClick={() => onGoto('extend')}>EXTEND</button> 탭은 프로젝트의{' '}
             <code>.claude/</code>를 위한 GUI입니다: <strong>Skills</strong>, <strong>Commands</strong>,{' '}
@@ -270,9 +270,9 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
 
         <Section title="명령 팔레트 & 단축키">
           <ul className="gd-ul">
-            <li><code>Ctrl/Cmd+K</code> — 명령 팔레트(탭 전환, 대화 시작/이어가기, 모델·효율·권한 변경, cost-saver 토글 등).</li>
-            <li><code>Ctrl/Cmd+/</code> — 키보드 단축키 도움말 오버레이.</li>
-            <li><code>Ctrl/Cmd+F</code> — 현재 대화 검색.</li>
+            <li><code>Ctrl/Cmd+K</code>: 명령 팔레트(탭 전환, 대화 시작/이어가기, 모델·효율·권한 변경, cost-saver 토글 등).</li>
+            <li><code>Ctrl/Cmd+/</code>: 키보드 단축키 도움말 오버레이.</li>
+            <li><code>Ctrl/Cmd+F</code>: 현재 대화 검색.</li>
             <li><code>Enter</code> 전송 · <code>Shift+Enter</code> 줄바꿈 · <code>Esc</code> 모달 닫기.</li>
             <li><code>↑ / ↓</code> 이전 프롬프트 불러오기(빈 작성창) · <code>/</code> 슬래시 명령 메뉴.</li>
           </ul>
@@ -286,7 +286,7 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
               헤더에 “✦ persona”가 표시됩니다.
             </li>
             <li>
-              <strong>Clawd, 데스크톱 펫:</strong> 활동에 반응하는 선택형 떠다니는 친구 — 에이전트가
+              <strong>Clawd, 데스크톱 펫:</strong> 활동에 반응하는 선택형 떠다니는 친구. 에이전트가
               일하는 동안 타이핑하고, 성공하면 축하하고, 한가하면 졸아요. 사이드바/설정에서 켜고 아무 곳
               으로나 드래그하세요.
             </li>
@@ -305,8 +305,8 @@ export default function GuideView({ onGoto }: { onGoto: (v: View) => void }): JS
         <Section title="로그인 옵션">
           <p className="gd-p">
             Forge는 Claude <strong>구독</strong>(기존 <code>~/.claude</code> 로그인 재사용),{' '}
-            <strong>설치 토큰(setup token)</strong>, 또는 <strong>API 키</strong> 중 무엇으로도 동작합니다
-            — 선택은 자유이며 모두 로컬에서 처리됩니다.
+            <strong>설치 토큰(setup token)</strong>, 또는 <strong>API 키</strong> 중 무엇으로도 동작합니다.
+            선택은 자유이며 모두 로컬에서 처리됩니다.
           </p>
         </Section>
 

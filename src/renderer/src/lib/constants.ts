@@ -19,7 +19,7 @@ export const PERMS: { id: Permission; title: string; desc: string }[] = [
 export const CLIENT_COMMANDS: SlashCommand[] = [
   {
     name: 'model',
-    description: 'Set the model — alias or any id, e.g. /model claude-opus-4-6',
+    description: 'Set the model: alias or any id, e.g. /model claude-opus-4-6',
     argumentHint: '<name|id>'
   },
   { name: 'effort', description: 'Set reasoning effort', argumentHint: '<auto|low|medium|high|xhigh|max>' },

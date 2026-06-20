@@ -255,7 +255,7 @@ export default function SquadView({ debugRuns }: SquadViewProps): JSX.Element {
                               : 'Verified by an LLM rubric judge'
                           }
                         >
-                          {a.verifier === 'tool' ? '🔧' : '⚖'}
+                          {a.verifier === 'tool' ? <Icon name="tool" /> : <Icon name="scale" />}
                         </span>
                       )}
                       {a.kind === 'orchestration' && a.score !== undefined && (

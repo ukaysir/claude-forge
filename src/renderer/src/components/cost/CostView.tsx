@@ -173,7 +173,7 @@ export default function CostView(): JSX.Element {
       const pct = Math.round((totals.cost / budget) * 100)
       const msg =
         level === 100
-          ? `Budget reached — ${fmtCost(totals.cost)} of ${fmtCost(budget)} (${pct}%).`
+          ? `Budget reached: ${fmtCost(totals.cost)} of ${fmtCost(budget)} (${pct}%).`
           : `${pct}% of your ${fmtCost(budget)} budget used (${fmtCost(totals.cost)}).`
       const id = Date.now()
       setToasts((t) => [...t, { id, level: level as 80 | 100, msg }])
@@ -301,7 +301,7 @@ export default function CostView(): JSX.Element {
             <div className="cost-cachebar-fill" style={{ width: cacheHit + '%' }} />
           </div>
           <div className="cost-cachebar-legend">
-            Higher is cheaper — cache reads cost ~10% of fresh input tokens
+            Higher is cheaper. Cache reads cost ~10% of fresh input tokens
             (docs/TOKEN_OPTIMIZATION.md §3 lever 1).
           </div>
         </div>
@@ -365,8 +365,8 @@ export default function CostView(): JSX.Element {
             <div className="cost-empty-mark">⛁</div>
             <div className="cost-empty-title">No runs recorded yet</div>
             <div className="cost-empty-text">
-              Token, cache-hit and cost figures appear here automatically after each chat run —
-              no extra tokens, captured from the SDK result you already paid for.
+              Token, cache-hit and cost figures appear here automatically after each chat run.
+              No extra tokens, captured from the SDK result you already paid for.
             </div>
           </div>
         ) : (
@@ -398,9 +398,9 @@ export default function CostView(): JSX.Element {
                   <span className="ct-num">{fmtTokens(a.outputTokens ?? 0)}</span>
                   <span className={`ct-num ${hit >= 50 ? 'good' : ''}`}>{hit}%</span>
                   <span className="ct-num cost">
-                    {typeof a.costUsd === 'number' ? fmtCost(a.costUsd) : '—'}
+                    {typeof a.costUsd === 'number' ? fmtCost(a.costUsd) : '-'}
                   </span>
-                  <span className="ct-num">{dur ? fmtDuration(dur) : '—'}</span>
+                  <span className="ct-num">{dur ? fmtDuration(dur) : '-'}</span>
                   <span className="ct-num when">{relTime(a.endedAt ?? a.startedAt, now)}</span>
                 </div>
               )

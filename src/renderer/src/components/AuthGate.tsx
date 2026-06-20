@@ -38,7 +38,7 @@ export default function AuthGate({
               Claude subscription
               <span className="badge">RECOMMENDED</span>
             </div>
-            <div className="method-desc">Pro / Max login — the same way the CLI works.</div>
+            <div className="method-desc">Pro / Max login, the same way the CLI works.</div>
           </button>
 
           <button
@@ -111,7 +111,7 @@ function SubscriptionPanel({
           <div className="found-row">
             <span className="conn-dot" />
             <span>
-              Found your Claude Code login on this machine. Use it — no setup needed.
+              Found your Claude Code login on this machine. Use it, no setup needed.
             </span>
           </div>
           <button className="primary" disabled={busy} onClick={useExisting}>
@@ -127,7 +127,7 @@ function SubscriptionPanel({
       )}
 
       <button className="subtle-toggle" onClick={() => setShowToken((v) => !v)}>
-        {showToken ? '▾' : '▸'} Advanced — paste a setup-token
+        {showToken ? '▾' : '▸'} Advanced: paste a setup-token
       </button>
 
       {showToken && (

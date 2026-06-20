@@ -92,7 +92,7 @@ export default function HooksPanel(): JSX.Element {
           </div>
           <div className="skills-empty-title">No hooks yet</div>
           <div className="skills-empty-desc">
-            Add a hook to run a shell command when an event fires — e.g. a desktop notification on
+            Add a hook to run a shell command when an event fires, e.g. a desktop notification on
             <code>Stop</code>, or a guard on <code>PreToolUse</code>.
           </div>
         </div>
@@ -123,7 +123,7 @@ export default function HooksPanel(): JSX.Element {
                   <input
                     className="skill-input"
                     value={r.matcher}
-                    placeholder={toolEvent(r.event) ? 'Bash · Edit|Write · * (blank = all)' : '—'}
+                    placeholder={toolEvent(r.event) ? 'Bash · Edit|Write · * (blank = all)' : '-'}
                     spellCheck={false}
                     disabled={!toolEvent(r.event)}
                     onChange={(e) => patch(r.id, { matcher: e.target.value })}

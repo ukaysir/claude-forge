@@ -80,8 +80,8 @@ export default function MemoryPanel(): JSX.Element {
         <div>
           <div className="skills-title">MEMORY</div>
           <div className="skills-sub">
-            Facts Forge auto-captures from tool use (file edits, commands) and recalls — compressed,
-            budget-bounded — at the start of new conversations, so the agent re-explains less. Local
+            Facts Forge auto-captures from tool use (file edits, commands) and recalls (compressed,
+            budget-bounded) at the start of new conversations, so the agent re-explains less. Local
             only · zero extra tokens · secrets stripped before storage.
           </div>
         </div>
@@ -108,7 +108,7 @@ export default function MemoryPanel(): JSX.Element {
           <div className="skill-name">Progressive disclosure tools</div>
           <div className="skill-desc">
             Expose <code>memory_search</code> → <code>memory_timeline</code> →{' '}
-            <code>memory_get</code> so the agent recalls deep facts on demand — scanning a cheap
+            <code>memory_get</code> so the agent recalls deep facts on demand, scanning a cheap
             index and fetching full text only for what it needs (claude-mem style, ~filter-before-fetch).
             Off by default: live tools add a small per-turn tool cost.
           </div>

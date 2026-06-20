@@ -57,7 +57,7 @@ export default function HistoryView({ items }: { items: TranscriptItem[] }): JSX
           </div>
         )
       })}
-      <div className="history-divider">— resumed · continue below —</div>
+      <div className="history-divider">resumed · continue below</div>
     </div>
   )
 }

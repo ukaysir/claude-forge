@@ -63,7 +63,7 @@ export default function PluginsPanel({ onChanged }: { onChanged?: () => void }):
         <div>
           <div className="skills-title">PLUGINS</div>
           <div className="skills-sub">
-            Local plugin bundles (a dir with <code>.claude-plugin/plugin.json</code>) — skills,
+            Local plugin bundles (a dir with <code>.claude-plugin/plugin.json</code>): skills,
             commands, hooks &amp; agents in one package
           </div>
         </div>

@@ -25,7 +25,7 @@ function blockMd(b: Block): string[] {
 }
 
 function itemMd(it: TranscriptItem): string[] {
-  if (it.kind === 'user') return ['## 🧑 You', '', it.text, '']
+  if (it.kind === 'user') return ['## You', '', it.text, '']
   if (it.kind === 'text') return ['### ⚒ Assistant', '', it.text, '']
   if (it.kind === 'thinking')
     return it.text ? ['> _thinking_', ...it.text.split('\n').map((l) => '> ' + l), ''] : []
@@ -36,11 +36,11 @@ function itemMd(it: TranscriptItem): string[] {
 
 /** Render the whole conversation as a Markdown document. */
 export function conversationToMarkdown(c: ExportConversation): string {
-  const lines: string[] = ['# Claude Forge — conversation', '', `_Exported ${new Date().toLocaleString()}_`, '']
+  const lines: string[] = ['# Claude Forge conversation', '', `_Exported ${new Date().toLocaleString()}_`, '']
   for (const it of c.history) lines.push(...itemMd(it))
   if (c.history.length && c.turns.length) lines.push('---', '')
   for (const t of c.turns) {
-    lines.push('## 🧑 You', '', t.prompt, '', '### ⚒ Assistant', '')
+    lines.push('## You', '', t.prompt, '', '### ⚒ Assistant', '')
     for (const b of t.blocks) lines.push(...blockMd(b))
     if (t.meta?.error) lines.push(`> ⚠ ${t.meta.error}`, '')
     if (t.meta && typeof t.meta.costUsd === 'number')

@@ -84,7 +84,7 @@ export default function CommandsPanel({ onChanged }: { onChanged?: () => void })
           </div>
           <div className="skills-empty-title">No custom commands yet</div>
           <div className="skills-empty-desc">
-            Create reusable prompt templates — they appear in the composer slash menu on the next
+            Create reusable prompt templates. They appear in the composer slash menu on the next
             run.
           </div>
         </div>

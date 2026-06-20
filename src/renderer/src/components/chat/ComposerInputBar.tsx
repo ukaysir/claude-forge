@@ -3,6 +3,7 @@
 // focused on state and run wiring. Behavior-preserving.
 import { type JSX } from 'react'
 import PromptUpgrade from './PromptUpgrade'
+import Icon from '../Icon'
 import type { Attachment } from './useAttachments'
 import type { ComposerInput } from './useComposerInput'
 
@@ -59,7 +60,7 @@ export default function ComposerInputBar({
               </div>
             ) : (
               <div className="attach-file" key={a.id} title={a.name}>
-                <span className="attach-file-icon">🗎</span>
+                <span className="attach-file-icon"><Icon name="file" /></span>
                 <span className="attach-file-name">{a.name}</span>
                 <button
                   className="attach-x"

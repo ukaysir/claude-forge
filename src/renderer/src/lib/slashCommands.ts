@@ -48,7 +48,7 @@ export function handleSlashCommand(raw: string, ctx: SlashCommandContext): boole
         raw,
         `Sets the model for THIS conversation. Models: ${ctx.models
           .map((x) => x.value)
-          .join(', ')} — or any model ID (e.g. /model claude-opus-4-6), or /model global to use the sidebar default.`
+          .join(', ')}. Or any model ID (e.g. /model claude-opus-4-6), or /model global to use the sidebar default.`
       )
       setPrompt('')
       return true
@@ -110,7 +110,7 @@ export function handleSlashCommand(raw: string, ctx: SlashCommandContext): boole
       )
     } else if (a === 'clear' || a === 'off' || a === 'none') {
       ctx.onSetConvPersona(null)
-      pushNotice(raw, '✓ Conversation persona cleared — using the global agent.')
+      pushNotice(raw, '✓ Conversation persona cleared. Using the global agent.')
     } else {
       ctx.onSetConvPersona(arg)
       pushNotice(raw, `✓ Conversation persona set for this chat:\n\n${arg}`)
@@ -129,7 +129,7 @@ export function handleSlashCommand(raw: string, ctx: SlashCommandContext): boole
     if (!arg) {
       pushNotice(
         raw,
-        'Usage: /goal [maxIterations] <objective> — runs autonomously until the' +
+        'Usage: /goal [maxIterations] <objective>. Runs autonomously until the' +
           ' objective is met (or the cap). Example: /goal 15 add a dark-mode toggle with tests.'
       )
       setPrompt('')

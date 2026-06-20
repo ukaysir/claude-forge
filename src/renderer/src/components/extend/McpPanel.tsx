@@ -128,7 +128,7 @@ export default function McpPanel({
           </div>
           <div className="skills-empty-title">No MCP servers</div>
           <div className="skills-empty-desc">
-            Add a server to give the agent extra tools — a local stdio process or a remote http/sse
+            Add a server to give the agent extra tools: a local stdio process or a remote http/sse
             endpoint.
           </div>
         </div>
