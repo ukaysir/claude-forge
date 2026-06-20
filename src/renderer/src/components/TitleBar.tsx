@@ -1,6 +1,7 @@
 // Custom frameless-window titlebar (docs/MAINTAINABILITY.md Phase 3). Extracted
 // verbatim from App.tsx — behavior-preserving, plus a desktop-pet toggle.
 import { useEffect, useState, type JSX } from 'react'
+import Icon from './Icon'
 
 export default function TitleBar(): JSX.Element {
   const [petOn, setPetOn] = useState(false)
@@ -33,7 +34,7 @@ export default function TitleBar(): JSX.Element {
           onClick={togglePet}
           style={{ opacity: petOn ? 1 : 0.45 }}
         >
-          🦀
+          <Icon name="pet" />
         </button>
         <button className="tb-btn" title="Minimize" onClick={() => window.forge.window.minimize()}>
           <svg width="10" height="10" viewBox="0 0 10 10">

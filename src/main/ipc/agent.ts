@@ -16,6 +16,7 @@ import {
   renameSession,
   deleteSession,
   searchSessions,
+  runUpgradePrompt,
   type RunOptions
 } from '../agent'
 
@@ -43,4 +44,9 @@ export function register(ipc: IpcMain): void {
   )
   ipc.handle('agent:delete-session', (_e, sessionId: string) => deleteSession(sessionId))
   ipc.handle('agent:search-sessions', (_e, query: string) => searchSessions(query))
+  // Improve a draft prompt with one read-only, tool-free model call (the ✨
+  // Upgrade button). Follows the conversation's selected model.
+  ipc.handle('agent:upgrade-prompt', (_e, original: string, model?: string, mode?: string) =>
+    runUpgradePrompt(original, model, mode)
+  )
 }

@@ -17,7 +17,7 @@ export default function ReliabilityBanner({
       {reliability.retry && (
         <div className="rb-item retry">
           <span className="rb-spin" aria-hidden /> Retrying
-          {reliability.retry.status ? ` (${reliability.retry.status})` : ''} — attempt{' '}
+          {reliability.retry.status ? ` (${reliability.retry.status})` : ''}, attempt{' '}
           {reliability.retry.attempt}/{reliability.retry.max}…
         </div>
       )}
@@ -25,7 +25,7 @@ export default function ReliabilityBanner({
         <div className={`rb-item rate ${reliability.rate.status}`}>
           ⚠ Rate limit{reliability.rate.rateLimitType ? ` (${reliability.rate.rateLimitType})` : ''}
           {typeof reliability.rate.utilization === 'number'
-            ? ` — ${Math.round(reliability.rate.utilization * 100)}% used`
+            ? `, ${Math.round(reliability.rate.utilization * 100)}% used`
             : ''}
           {reliability.rate.resetsAt
             ? ` · resets ${new Date(
@@ -40,7 +40,7 @@ export default function ReliabilityBanner({
         <div className="rb-item compact">
           ✦ Context {reliability.compact.trigger === 'auto' ? 'auto-' : ''}compacted
           {reliability.compact.pre
-            ? ` — ${Math.round(reliability.compact.pre / 1000)}k→${
+            ? `: ${Math.round(reliability.compact.pre / 1000)}k→${
                 reliability.compact.post ? Math.round(reliability.compact.post / 1000) + 'k' : '…'
               } tokens`
             : ''}

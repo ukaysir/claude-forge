@@ -9,8 +9,8 @@ import type { LazySetting } from '../types'
 const LAZY_LEVELS: { value: LazySetting; label: string; hint: string }[] = [
   { value: 'off', label: 'Off', hint: 'Normal mode. (The "ponytail" / "lazy mode" keyword still works per message.)' },
   { value: 'lite', label: 'Lite', hint: 'Offer the lazy path as an alternative; don’t force it.' },
-  { value: 'full', label: 'Full', hint: 'Enforce the ladder — stop at the first rung that works.' },
-  { value: 'ultra', label: 'Ultra', hint: 'YAGNI extremist — challenge whether the requirement is even needed.' }
+  { value: 'full', label: 'Full', hint: 'Enforce the ladder: stop at the first rung that works.' },
+  { value: 'ultra', label: 'Ultra', hint: 'YAGNI extremist: challenge whether the requirement is even needed.' }
 ]
 
 export default function Settings({
@@ -126,7 +126,7 @@ export default function Settings({
           <div className="settings-hint">
             {LAZY_LEVELS.find((l) => l.value === lazyLevel)?.hint} When on, every run is told to
             write the laziest solution that works (YAGNI → stdlib → native → existing dep →
-            one-liner) — never trading away validation, error handling, security, or accessibility.
+            one-liner). Never trading away validation, error handling, security, or accessibility.
           </div>
         </div>
 
@@ -154,7 +154,7 @@ export default function Settings({
             </button>
           </div>
           <div className="settings-hint">
-            Local-only — nothing here is sent anywhere. Conversations/workspaces on disk are
+            Local-only. Nothing here is sent anywhere. Conversations/workspaces on disk are
             managed from the sidebar.
           </div>
         </div>

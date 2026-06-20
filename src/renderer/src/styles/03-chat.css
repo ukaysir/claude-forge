@@ -634,12 +634,54 @@
   background: var(--bg);
   white-space: pre-wrap;
   word-break: break-word;
+  font-family: var(--mono);
   font-size: 12px;
   line-height: 1.55;
   color: var(--muted);
   max-height: 220px;
   overflow: auto;
   user-select: text;
+}
+/* Collapsible tool output: only the first line is shown by default; clicking
+   the header expands the full result. Keeps the live transcript scannable. */
+.tool-result-block {
+  display: flex;
+  flex-direction: column;
+}
+.tool-result-block .tool-result {
+  /* Collapsed = single line: drop the inner scroll cap so it hugs the line. */
+  max-height: none;
+  overflow: visible;
+}
+.tool-result-block.expanded .tool-result {
+  max-height: 320px;
+  overflow: auto;
+}
+.tool-result-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 14px;
+  border: none;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  color: var(--faint);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.12s ease;
+}
+.tool-result-toggle:hover {
+  color: var(--muted);
+}
+.tool-result-caret {
+  flex: none;
+  width: 10px;
+  color: var(--amber);
 }
 /* ---- file-edit diff (Edit / Write / NotebookEdit) ---- */
 .diff-stat {
@@ -1412,5 +1454,161 @@ button.cc-persona:not(.on) .cc-persona-state {
 }
 .q-other:focus {
   border-color: var(--amber);
+}
+
+/* ── Prompt upgrade — composer button + preview/diff modal ─────────────────── */
+/* Token-driven, follows DESIGN.md: line icon (no emoji), accent escalates by
+   border/text color, motion via --dur-1/--ease-out, diff hues via color-mix. */
+.pu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: none;
+  cursor: pointer;
+  border: 1px solid var(--amber-dim);
+  border-radius: var(--r-2);
+  background: transparent;
+  color: var(--amber);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.06em;
+  padding: 4px 8px;
+  white-space: nowrap;
+  transition: all var(--dur-1) var(--ease-out);
+}
+.pu-btn .icon {
+  font-size: 1.1em;
+}
+.pu-btn:hover:not(:disabled) {
+  color: var(--amber-bright);
+  border-color: var(--amber);
+  background: rgba(var(--accent-rgb), 0.1);
+}
+.pu-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: var(--muted);
+  border-color: var(--border);
+}
+.pu-modal {
+  width: 640px;
+}
+.pu-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.pu-modes {
+  display: flex;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+.pu-mode {
+  flex: 1;
+  cursor: pointer;
+  padding: 7px 10px;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  transition: all var(--dur-1) var(--ease-out);
+}
+.pu-mode:hover:not(:disabled) {
+  border-color: var(--amber-dim);
+  color: var(--text);
+}
+.pu-mode.on {
+  color: var(--amber-bright);
+  border-color: var(--amber);
+  background: rgba(var(--accent-rgb), 0.08);
+}
+.pu-mode:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pu-diff {
+  max-height: 46vh;
+  overflow: auto;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-3);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--mono);
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  color: var(--text);
+  user-select: text;
+}
+.pu-add {
+  background: color-mix(in srgb, var(--ok) 16%, transparent);
+  color: var(--ok-bright);
+  text-decoration: none;
+  border-radius: var(--r-1);
+}
+.pu-del {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  color: var(--danger-bright);
+  text-decoration: line-through;
+  border-radius: var(--r-1);
+}
+.pu-after {
+  white-space: pre-wrap;
+}
+.pu-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--faint);
+}
+.pu-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.pu-leg {
+  padding: 1px 6px;
+  border-radius: var(--r-1);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.04em;
+}
+.pu-leg-add {
+  background: color-mix(in srgb, var(--ok) 16%, transparent);
+  color: var(--ok-bright);
+}
+.pu-leg-del {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  color: var(--danger-bright);
+  text-decoration: line-through;
+}
+.pu-cost {
+  color: var(--amber-dim);
+  font-variant-numeric: tabular-nums;
+}
+.pu-loading,
+.pu-error {
+  padding: var(--sp-5) var(--sp-4);
+  text-align: center;
+  font-size: var(--fs-base);
+  color: var(--muted);
+}
+.pu-error {
+  color: var(--danger);
+}
+.pu-spin {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  border: 2px solid color-mix(in srgb, var(--amber) 30%, transparent);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  vertical-align: -2px;
+  animation: spin 0.7s linear infinite;
 }
 

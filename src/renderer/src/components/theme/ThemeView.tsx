@@ -149,7 +149,7 @@ function ThemeEditor({
             <ThemePreview theme={buildCustomTheme(draft.id, draft.name, draft.identity)} />
           </div>
           <div className={`te-contrast${ratioOk ? ' ok' : ' low'}`}>
-            <span className="te-contrast-num">{ratio ? ratio.toFixed(1) : '–'}:1</span>
+            <span className="te-contrast-num">{ratio ? ratio.toFixed(1) : '-'}:1</span>
             <span className="te-contrast-note">
               {ratioOk ? 'text on base passes AA' : 'text on base is low (aim ≥ 4.5:1)'}
             </span>

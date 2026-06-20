@@ -110,7 +110,7 @@ export default function SkillsPanel(): JSX.Element {
           </div>
           <div className="skills-empty-title">No skills yet</div>
           <div className="skills-empty-desc">
-            Create one to give the agent a reusable, on-demand capability — discovered from
+            Create one to give the agent a reusable, on-demand capability, discovered from
             <code>.claude/skills</code> on every run.
           </div>
         </div>
@@ -120,7 +120,7 @@ export default function SkillsPanel(): JSX.Element {
             <div key={s.name} className={`skill-row ${s.enabled ? '' : 'off'}`}>
               <button
                 className={`skill-switch ${s.enabled ? 'on' : ''}`}
-                title={s.enabled ? 'Enabled — click to hide from the model' : 'Disabled — click to enable'}
+                title={s.enabled ? 'Enabled. Click to hide from the model' : 'Disabled. Click to enable'}
                 disabled={busy}
                 onClick={() => toggle(s)}
               >

@@ -16,7 +16,7 @@ Electron · TypeScript · React · electron-vite · local-only · BYO key
 
 Claude Forge wraps `@anthropic-ai/claude-agent-sdk` in a native desktop app so you can run agentic conversations with live streaming of thinking, tool calls, and responses — without living in a terminal. It reuses your existing **Claude subscription login**, runs everything **locally**, and never sends your keys or content to any third-party server.
 
-The app has five primary views — **Chat**, **Agents**, **Cost**, **Extend**, **Guide** — plus an optional desktop pet ("Clawd") in its own frameless window, and a **Cmd/Ctrl+K command palette**.
+The app has six primary views — **Chat**, **Agents**, **Cost**, **Extend**, **Guide**, **Theme** — plus an optional desktop pet ("Clawd") in its own frameless window, and a **Cmd/Ctrl+K command palette**.
 
 ## Features
 
@@ -37,6 +37,7 @@ The app has five primary views — **Chat**, **Agents**, **Cost**, **Extend**, *
 - **Extend console** — a GUI over the filesystem `.claude/`: Skills, Commands, Hooks, MCP servers, Agents, Plugins, **Providers**. (Secrets-bearing config — MCP, plugins, skill toggles, provider keys — stay in Forge-private `forge-*.json`, out of model-readable `.claude/`.)
 - **Free / multi-provider delegation** *(experimental — needs a provider key)* — register free non-Anthropic models (OpenRouter / Gemini / Groq / Ollama, or any goose-supported provider) under **Extend → Providers**; the orchestrator Claude then offloads simple subtasks to them via a `delegate` tool (driven by [goose](https://github.com/block/goose)) so easy work costs $0, with automatic 429/quota fallback across providers. Design + status in [`docs/GOOSE_INTEGRATION.md`](./docs/GOOSE_INTEGRATION.md). **Note:** delegated subtask content is sent to that provider — not local-only.
 - **Guide** — a first-run feature tour with inline links into each tab.
+- **Theme marketplace** — a recolor-only theme engine: built-in presets (Amber / Slate / Forest / Graphite / Orchid) shown as honest mini-mock preview cards, plus a custom color editor that live-applies to the whole app as you edit (with a WCAG text-contrast guard). Themes swap only the color CSS variables; structural tokens (radius/spacing/type/motion) never change. Persisted and applied before first paint.
 - **Desktop pet ("Clawd")** — an optional frameless, transparent, draggable window that animates in reaction to agent activity. Toggleable + persisted.
 - **MCP server status**, **subscription usage %** panel, custom **persona/system prompt**, **token optimization** (cache-stable prompts, difficulty routing, cascade), **Pretendard** font, frameless custom titlebar + themed scrollbar.
 
@@ -75,7 +76,7 @@ npm run start        # preview the built app
 ### Quality gates
 ```bash
 npm run typecheck    # tsc --noEmit
-npm run selftest     # headless orchestration-core correctness check (~94 assertions, no live session)
+npm run selftest     # headless orchestration-core correctness check (133 checks, no live session)
 npm run test         # pure renderer-lib unit tests (node:test — no DOM/Electron/SDK)
 npm run lint         # eslint
 npm run format       # prettier --write
@@ -90,7 +91,8 @@ npm run format       # prettier --write
 3. **Agents** — watch live agent cards and subagent activity; click a card to expand its tool timeline. The History list persists past runs with cost / duration / verifier provenance.
 4. **Cost** — review aggregate spend, prompt-cache hit %, and a per-run token breakdown.
 5. **Extend** — manage Skills, Commands, Hooks, MCP servers, Agents, and Plugins from a GUI.
-6. **Slash commands** — SDK commands (`/usage`, `/context`, …) run as prompts; REPL-only ones (`/model`, `/help`) are handled in-app to mirror the Claude Code CLI; unknown commands get a clear notice.
+6. **Theme** — pick a built-in preset or build a custom palette in the Theme tab; changes apply live and persist across restarts.
+7. **Slash commands** — SDK commands (`/usage`, `/context`, …) run as prompts; REPL-only ones (`/model`, `/help`) are handled in-app to mirror the Claude Code CLI; unknown commands get a clear notice.
 
 ## Project structure
 
@@ -99,7 +101,7 @@ src/
   main/
     index.ts          thin shell: frameless BrowserWindow + registerAll(ipc) + initPet + initActivity
     agent/            SDK runner — runStreaming() is per-runId & concurrency-safe (+ subtask/usage/sessions/...)
-    ipc/              per-domain IPC handlers (auth, agent, persona, extend, orchestrate, activity, window, pet, workspace)
+    ipc/              per-domain IPC handlers (auth, agent, persona, extend, orchestrate, activity, memory, window, pet, workspace)
     workspace.ts      pure local fs read of a conversation's isolated workspace (backs WorkspaceFiles)
     orchestration.ts  pure data contracts + graph helpers   } the headless-testable
     conductor.ts      plan validation + DAG executor        } orchestration core
@@ -112,10 +114,10 @@ src/
     index.ts          window.forge bridge       pet.ts  pet-only window.pet bridge
   renderer/src/
     App.tsx           shell + MainShell (sidebar/usage/caps + view routing)
-    components/       chat/ (thin Composer + co-located hooks) squad/ cost/ extend/ guide/ persona/ palette/
+    components/       chat/ (thin Composer + co-located hooks) squad/ cost/ extend/ guide/ theme/ persona/ palette/
                       + TitleBar, AuthGate, Md, Sidebar, Settings, WorkspaceFiles, ConversationSearch, ShortcutsHelp
-    lib/              pure, tested helpers/types (blocks, format, export, goal, slashCommands, composer, storage, ...)
-    styles/           CSS partials (00-core … 08-palette); styles.css is just the @import index
+    lib/              pure, tested helpers/types (blocks, format, export, goal, slashCommands, composer, storage, theme, ...)
+    styles/           CSS partials (00-core … 10-theme); styles.css is just the @import index
   renderer/pet/       plain-JS pet renderer (no React)
 electron.vite.config.ts
 ```

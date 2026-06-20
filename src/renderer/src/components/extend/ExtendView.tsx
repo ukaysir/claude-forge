@@ -82,7 +82,7 @@ export default function ExtendView({
         ) : (
           <div className="extend-stub">
             {active && <Icon name={active.icon} className="extend-stub-icon" />}
-            <div className="extend-stub-title">{active?.label} — coming next</div>
+            <div className="extend-stub-title">{active?.label}: coming next</div>
             <div className="extend-stub-desc">
               This panel lands in a later roadmap phase. Skills is live now.
             </div>

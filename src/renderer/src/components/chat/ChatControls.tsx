@@ -108,7 +108,7 @@ export default function ChatControls({
         onClick={() => setPersonaOpen(true)}
       >
         <span className="cc-label">system prompt</span>
-        <span className="cc-persona-state">{convPersona ? '✦ custom' : '— global'}</span>
+        <span className="cc-persona-state">{convPersona ? '✦ custom' : 'global'}</span>
       </button>
 
       {mcpServers.length > 0 && (
@@ -119,7 +119,7 @@ export default function ChatControls({
         >
           <span className="cc-label">mcp</span>
           <span className="cc-persona-state">
-            {mcpScope ? `${mcpActive}/${mcpServers.length}` : '— all'}
+            {mcpScope ? `${mcpActive}/${mcpServers.length}` : 'all'}
           </span>
         </button>
       )}
@@ -234,7 +234,7 @@ function PersonaEditor({
       <div className="modal cc-persona-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-title">CONVERSATION SYSTEM PROMPT</div>
         <div className="help-note">
-          Custom instructions for THIS conversation only — they replace the global agent
+          Custom instructions for THIS conversation only. They replace the global agent
           persona for this chat. Leave empty to use the global agent.
         </div>
         <textarea

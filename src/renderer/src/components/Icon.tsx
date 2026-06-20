@@ -21,6 +21,11 @@ export type IconName =
   | 'theme'
   | 'thinking'
   | 'inspect'
+  | 'upgrade'
+  | 'target'
+  | 'scale'
+  | 'file'
+  | 'pet'
 
 const PATHS: Record<IconName, JSX.Element> = {
   chat: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
@@ -114,6 +119,52 @@ const PATHS: Record<IconName, JSX.Element> = {
     <>
       <circle cx="11" cy="11" r="7" />
       <line x1="20.5" y1="20.5" x2="16.65" y2="16.65" />
+    </>
+  ),
+  // Double sparkle — AI prompt upgrade. A large concave 4-point star plus a small
+  // twinkle, distinct from the single `thinking` sparkle. Same quadratic-curve
+  // construction so it reads as one clean glyph in the line family.
+  upgrade: (
+    <>
+      <path d="M10 5 Q10.5 11 15.5 13 Q10.5 15 10 21 Q9.5 15 4.5 13 Q9.5 11 10 5 Z" />
+      <path d="M17.5 3.5 Q17.7 5.8 20 6.2 Q17.7 6.6 17.5 9 Q17.3 6.6 15 6.2 Q17.3 5.8 17.5 3.5 Z" />
+    </>
+  ),
+  // Concentric target — an autonomous goal/objective (the RALPH goal loop).
+  target: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="12" cy="12" r="0.6" />
+    </>
+  ),
+  // Balance scale — verification by an LLM rubric judge.
+  scale: (
+    <>
+      <line x1="12" y1="4" x2="12" y2="20" />
+      <line x1="8" y1="20" x2="16" y2="20" />
+      <line x1="4" y1="7" x2="20" y2="7" />
+      <path d="M4 7 1.5 13 6.5 13Z" />
+      <path d="M20 7 17.5 13 22.5 13Z" />
+    </>
+  ),
+  // Document with folded corner — an attached text/code file.
+  file: (
+    <>
+      <path d="M13.5 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5z" />
+      <path d="M13.5 3v5.5H19" />
+      <line x1="8.5" y1="13" x2="15.5" y2="13" />
+      <line x1="8.5" y1="16.5" x2="13" y2="16.5" />
+    </>
+  ),
+  // Paw print — the optional desktop pet (Clawd) toggle.
+  pet: (
+    <>
+      <ellipse cx="12" cy="15.5" rx="3.6" ry="3" />
+      <circle cx="6.6" cy="11" r="1.7" />
+      <circle cx="10" cy="7.2" r="1.7" />
+      <circle cx="14" cy="7.2" r="1.7" />
+      <circle cx="17.4" cy="11" r="1.7" />
     </>
   )
 }

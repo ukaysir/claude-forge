@@ -71,7 +71,7 @@ export default function WorkspaceFiles({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal wsf-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-title">
-          WORKSPACE — this conversation
+          WORKSPACE: this conversation
           <span className="wsf-tabs">
             <button className={`wsf-tab ${view === 'files' ? 'on' : ''}`} onClick={() => setView('files')}>
               Files

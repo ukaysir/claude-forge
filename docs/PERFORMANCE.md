@@ -5,6 +5,12 @@
 >
 > **원칙**: 추측 말고 **측정**(§5). 모든 레버는 적용 전/후 프레임타임·렌더 횟수로 검증한다.
 > 마이크로 최적화(예: 인라인 함수 제거)는 프로파일이 가리킬 때만. 구조적 병목부터.
+>
+> **상태 노트(2026-06-20)**: §0 병목 진단 원장의 `App.tsx:NNNN` 코드 근거는 **분해 전 모놀리식
+> `App.tsx`(3927줄)** 기준의 *진단 시점 라인 번호*다(역사적 기록 — 그대로 보존). 이후 레버 1–4가
+> 적용·실측되었고(스트리밍 60fps·rAF 코얼레싱·memo·autoscroll 가드 — `docs/PROGRESS.md` §3 참조),
+> 해당 코드는 `App.tsx`에서 `src/renderer/src/components/chat/`(`BlockView.tsx`·`TurnView.tsx`·
+> `useAgentEvents.ts`) + `lib/`로 분해·이동되었다. 현재 `App.tsx`는 **685줄**, `Composer.tsx`는 953줄.
 
 ---
 

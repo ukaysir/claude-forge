@@ -26,15 +26,15 @@ export const GOAL_MAX_USD = 10
  * agent keeps all its real tools + the user's permission mode. */
 export function goalDirective(objective: string): string {
   return [
-    'GOAL MODE — autonomous objective loop.',
+    'GOAL MODE: autonomous objective loop.',
     `Objective: ${objective}`,
     'Work toward this objective using your available tools. This runs in a loop:' +
       ' after each turn you are automatically prompted to continue, so you need not' +
-      ' finish everything at once — make concrete, verifiable progress each turn.',
+      ' finish everything at once. Make concrete, verifiable progress each turn.',
     'At the VERY END of every response, output exactly one status token on its own line:',
-    '- GOAL_ACHIEVED — only when the objective is fully complete AND verified' +
+    '- GOAL_ACHIEVED: only when the objective is fully complete AND verified' +
       ' (prefer running tests / build / typecheck to confirm before declaring done).',
-    '- GOAL_CONTINUE — when more work remains; briefly state the next concrete step.',
+    '- GOAL_CONTINUE: when more work remains; briefly state the next concrete step.',
     'Do not output GOAL_ACHIEVED prematurely.'
   ].join('\n')
 }
