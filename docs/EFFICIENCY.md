@@ -80,7 +80,7 @@ output — the same task at a fraction of the tokens.
 
 - **Verified headlessly**: all pure cores — compression, BM25, retrieval,
   observation/privacy, repo-map parse/rank/render — via `npm run test`
-  (54 assertions); full `typecheck`, `build`, and `selftest` (105) green.
+  (54 assertions); full `typecheck`, `build`, and `selftest` (133) green.
 - **Pending a live subscription session** (this cloud env has no key / no GUI):
   the actual recall quality, injection effect on real runs, and the renderer
   panels were not exercised against a live model. Wiring is type-safe and builds;

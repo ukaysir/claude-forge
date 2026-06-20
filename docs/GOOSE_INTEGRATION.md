@@ -259,7 +259,7 @@ Recorded for completeness. Forge's pure orchestration core (`conductor`/`topolog
 
 ## 9. Follow-up checklist (next session — most need a provider key)
 
-The framework is complete + green (typecheck, selftest 105). What remains is live-confirmation + optional polish. Test path first:
+The framework is complete + green (typecheck, selftest 133). What remains is live-confirmation + optional polish. Test path first:
 ```bash
 node scripts/ensure-goose.mjs                          # fetch goose into resources/goose/<plat>/
 GOOSE_BIN=resources/goose/<plat>-<arch>/goose \

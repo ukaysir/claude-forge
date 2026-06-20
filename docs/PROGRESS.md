@@ -1,7 +1,18 @@
-# 플랜 진행률 추적 & 다음 할일 (2026-06-14)
+# 플랜 진행률 추적 & 다음 할일 (2026-06-20)
 
 > `docs/` 5개 플랜의 진행 상태를 **실제 코드 검증** 기반으로 추적한다. 각 플랜의 자체 원칙
 > ("추측 말고 측정")에 따라, 문서의 진행 기록을 코드와 대조해 확인한 결과만 기록한다.
+>
+> **업데이트(2026-06-20, 문서 정합성 검증 — 전체 docs/CLAUDE.md/README.md 코드 대조)**: 모든 문서를
+> 실제 코드와 대조해 정합성을 갱신했다. **검증된 현재 수치**: 기본 뷰 **6개**(chat / squad(=Agents) /
+> cost / extend / guide / **theme**) · `App.tsx` **685줄** · `src/main/index.ts` **110줄** ·
+> `Composer.tsx` 953줄 · `SquadView.tsx` 280줄 · 네이티브 역할 **19개**(`roles.ts`) · 골든셋 **53과제** ·
+> **`npm run selftest` 133 checks** · `npm run test` node:test **6파일**(efficiency / lib / mcpScope /
+> memory / repomap / retrieval) · `src/main/ipc/*` **11모듈**(+`memory.ts`) · `src/renderer/src/styles/`
+> **11파셜**(…`09-debug` · `10-theme`). CLAUDE.md·README.md를 현재 코드 기준으로 갱신(뷰 5→6 · **Theme 탭**
+> 추가 · `selftest ~94→133` · App.tsx/index.ts 라인수 · ipc/styles 목록 · `theme/ThemeView` 컴포넌트).
+> **주의(정직)**: 아래 *날짜별* 과거 게이트 수치(selftest 59/105/133 등)는 **해당 시점의 측정 기록**이므로
+> 보존한다 — 본 항목이 최신 상태의 단일 출처다.
 >
 > **업데이트(2026-06-19, codegraph MCP + claude-mem 점진적 공개 흡수)**: 두 오픈소스의 *특정 약점
 > 보완* 아이디어만 증류(EFFICIENCY.md 신규 섹션). ① **CodeGraph**(colbymchenry/codegraph, MIT) —
@@ -60,10 +71,10 @@
 | 4 | `SQUAD_ORCHESTRATION.md` (오케스트레이션) | 🟢어댑터 PASS·⚠️§8 혼합 | **~85%** | §8 풀셋(moderate서 FAIL) |
 | 5 | `TOKEN_OPTIMIZATION.md` (비용/토큰) | 🟡 레버1·4 라이브실증 | **~62%** | 레버2/3/5/6 + 구독 rate측정 |
 
-**검증 근거(갱신)**: `App.tsx`=538줄 · `agent.ts` → `agent/`(11파일) · `index.ts`=58줄 + `ipc/*`(6파일) ·
+**검증 근거(갱신, 2026-06-20)**: `App.tsx`=685줄 · `agent.ts` → `agent/`(11파일) · `index.ts`=110줄 + `ipc/*`(11파일) ·
 `settingSources` 설정됨 · 신설 순수 모듈 **`orchestration`/`routing`/`verifier`/`conductor`/`toolVerifier`/
 `topology`/`eval`**(주입형) · `options.agents` 전달(가산) · **`eval/golden-set.json` 53과제** ·
-`npm run selftest` **59/59 통과(8모듈)** · `node scripts/eval.mjs` 세션없이 검증 OK · **라이브(dev+CDP) 실모델
+`npm run selftest` **133 checks 통과** · `node scripts/eval.mjs` 세션없이 검증 OK · **라이브(dev+CDP) 실모델
 검증 ✅**: TOKEN 캐시/라우팅·SQUAD `orchestrate:run`·PERFORMANCE paste·eval §8 게이트(서브셋) 전부 실호출로 실증.
 
 > **공통 갭(갱신)**: 측정/검증 인프라(eval 하니스·골든셋·CDP 베이스라인·라이브 어댑터)는 이번 세션에

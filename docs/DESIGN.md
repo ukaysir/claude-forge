@@ -218,7 +218,7 @@ See **Modals** above — `ConfirmDialog.tsx` is the reference implementation (ov
 
 - **`.sidebar`** — `--bg-raised`, right hairline, `padding 26px 22px`, vertical flex, `gap: 26px`, scrolls independently. Holds the brand, selectors (model/effort/permission cards), usage panels, persona card, and the bottom `.ghost`.
 - **`.main`** — `grid; place-items:center` with a barely-there radial accent wash over `--bg`. Hosts the view router.
-- **`.view-pane`** — `flex:1; min-height:0; flex-direction:column`, and `.view-pane > * { flex:1; min-height:0 }` so each view fills. Views: chat / squad (Agents) / cost / extend / guide.
+- **`.view-pane`** — `flex:1; min-height:0; flex-direction:column`, and `.view-pane > * { flex:1; min-height:0 }` so each view fills. The six base views: chat / squad (Agents) / cost / extend / guide / theme.
 
 **Flexbox convention (critical).** In a flex column, **use `flex: 1; min-height: 0` to make a child fill, NOT `height: 100%`.** Percentage-height resolution against flex items is fragile in Chromium (see `CLAUDE.md` Gotchas). This pattern is everywhere: `.app-body`, `.view-pane`, `.transcript`, `.cost-root`/`.cost-scroll`, `.palette-list`, scroll regions. Pair scroll containers with `overflow-y: auto; min-height: 0`. Use `min-width: 0` on flex children that must ellipsis-truncate.
 
@@ -271,6 +271,8 @@ See **Modals** above — `ConfirmDialog.tsx` is the reference implementation (ov
 | `06-guide.css` | Guide tab — first-run tour |
 | `07-cost.css` | Cost & Cache dashboard |
 | `08-palette.css` | command palette |
+| `09-debug.css` | debug overlay |
+| `10-theme.css` | Theme tab — recolor-only theme marketplace (built-in presets + custom color editor) |
 
 **Rule: edit the partials, not the index.** (Stated in both `styles.css` and `CLAUDE.md`.)
 
