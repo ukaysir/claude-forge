@@ -21,6 +21,7 @@ export type IconName =
   | 'theme'
   | 'thinking'
   | 'inspect'
+  | 'upgrade'
 
 const PATHS: Record<IconName, JSX.Element> = {
   chat: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
@@ -114,6 +115,15 @@ const PATHS: Record<IconName, JSX.Element> = {
     <>
       <circle cx="11" cy="11" r="7" />
       <line x1="20.5" y1="20.5" x2="16.65" y2="16.65" />
+    </>
+  ),
+  // Double sparkle — AI prompt upgrade. A large concave 4-point star plus a small
+  // twinkle, distinct from the single `thinking` sparkle. Same quadratic-curve
+  // construction so it reads as one clean glyph in the line family.
+  upgrade: (
+    <>
+      <path d="M10 5 Q10.5 11 15.5 13 Q10.5 15 10 21 Q9.5 15 4.5 13 Q9.5 11 10 5 Z" />
+      <path d="M17.5 3.5 Q17.7 5.8 20 6.2 Q17.7 6.6 17.5 9 Q17.3 6.6 15 6.2 Q17.3 5.8 17.5 3.5 Z" />
     </>
   )
 }

@@ -10,7 +10,8 @@ import type {
   TranscriptItem,
   Persona,
   QuestionResult,
-  SessionSearchHit
+  SessionSearchHit,
+  UpgradeRunResult
 } from '../main/agent'
 import type {
   SkillMeta,
@@ -77,6 +78,9 @@ const forge = {
       ipcRenderer.invoke('agent:delete-session', sessionId),
     searchSessions: (query: string): Promise<SessionSearchHit[]> =>
       ipcRenderer.invoke('agent:search-sessions', query),
+    /** Improve a draft prompt via one read-only, tool-free model call (✨ Upgrade). */
+    upgradePrompt: (original: string, model?: string, mode?: string): Promise<UpgradeRunResult> =>
+      ipcRenderer.invoke('agent:upgrade-prompt', original, model, mode),
     /** Subscribe to streaming events. Returns an unsubscribe function. */
     onEvent: (cb: (ev: AgentEvent) => void): (() => void) => {
       const listener = (_e: IpcRendererEvent, payload: AgentEvent): void => cb(payload)

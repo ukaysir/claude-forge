@@ -36,3 +36,4 @@ export {
 } from './sessions'
 export { compactSession } from './compact'
 export { runStreaming } from './runStreaming'
+export { runUpgradePrompt, type UpgradeRunResult } from './upgradeRunner'

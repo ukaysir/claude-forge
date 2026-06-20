@@ -36,6 +36,7 @@ import TodoBar from './TodoBar'
 import ChatControls from './ChatControls'
 import PermissionModal from './PermissionModal'
 import QuestionModal from './QuestionModal'
+import PromptUpgrade from './PromptUpgrade'
 import ReliabilityBanner from './ReliabilityBanner'
 import WorkHeader from './WorkHeader'
 import Elapsed from './Elapsed'
@@ -861,6 +862,16 @@ export default function Composer({
             }}
           />
           <div className="send-col">
+            <PromptUpgrade
+              text={prompt}
+              model={model && model !== 'default' ? model : globalModel}
+              disabled={running}
+              onAccept={(next) => {
+                setPrompt(next)
+                setHistIndex(null)
+                taRef.current?.focus()
+              }}
+            />
             <button
               className={`scroll-toggle ${stickBottom ? 'on' : ''}`}
               title={
