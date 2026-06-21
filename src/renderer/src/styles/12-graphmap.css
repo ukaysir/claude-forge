@@ -253,13 +253,15 @@
 .gm-svg:active {
   cursor: grabbing;
 }
-/* The circular frame the cloud settles inside (see computeLayout / FRAME_R). */
+/* The circular frame that wraps the whole map (see computeLayout / FRAME_R).
+   A faint inner disc + a clearly visible ring so the cloud reads as *contained*
+   — nodes are clamped within FRAME_R, settling inside this boundary. */
 .gm-frame {
-  fill: none;
-  stroke: var(--border);
-  stroke-width: 1;
-  stroke-dasharray: 2 7;
-  opacity: 0.5;
+  fill: rgba(var(--accent-rgb), 0.05);
+  stroke: var(--amber-dim);
+  stroke-width: 1.75;
+  stroke-dasharray: 4 6;
+  opacity: 0.85;
   pointer-events: none;
 }
 .gm-edge {

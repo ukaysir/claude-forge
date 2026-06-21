@@ -77,14 +77,28 @@ export function computeLayout(nodes: GraphNode[], edges: GraphEdge[]): Map<strin
       disp[b].y += uy * att
     }
     const maxStep = 28 * cool + 2
+    // Hold the cloud inside the circular frame three ways: (1) a gentle gravity that
+    // pulls every node toward the center, (2) a soft cushion near the rim that ramps
+    // up the closer a node drifts to FRAME_R — so nodes settle *within* the disc
+    // instead of piling onto its edge — and (3) a final hard clamp as the safety net.
+    const cushion = FRAME_R * 0.82 // radius at which the inward push kicks in
     for (let i = 0; i < n; i++) {
-      disp[i].x += (cx - p[i].x) * 0.012
-      disp[i].y += (cy - p[i].y) * 0.012
+      disp[i].x += (cx - p[i].x) * 0.022
+      disp[i].y += (cy - p[i].y) * 0.022
+      const bx = p[i].x - cx
+      const by = p[i].y - cy
+      const bd = Math.sqrt(bx * bx + by * by) || 0.01
+      if (bd > cushion) {
+        const over = (bd - cushion) / (FRAME_R - cushion)
+        const push = over * over * 24
+        disp[i].x -= (bx / bd) * push
+        disp[i].y -= (by / bd) * push
+      }
       const d = Math.sqrt(disp[i].x * disp[i].x + disp[i].y * disp[i].y) || 0.01
       const step = Math.min(d, maxStep)
       p[i].x += (disp[i].x / d) * step
       p[i].y += (disp[i].y / d) * step
-      // Keep the cloud inside the circular frame: clamp to FRAME_R from center.
+      // Hard clamp to FRAME_R from center — nothing ever escapes the disc.
       const rx = p[i].x - cx
       const ry = p[i].y - cy
       const rd = Math.sqrt(rx * rx + ry * ry)

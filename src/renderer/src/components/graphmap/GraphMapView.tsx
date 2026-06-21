@@ -396,7 +396,7 @@ export default function GraphMapView({
                     className="gm-frame"
                     cx={FRAME_CX}
                     cy={FRAME_CY}
-                    r={FRAME_R + 14}
+                    r={FRAME_R + 20}
                   />
                   {visibleEdges.map((e, i) => {
                     const a = nodes.posOf(e.source)
