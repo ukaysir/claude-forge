@@ -12,6 +12,9 @@
 // UI surfaces both. Local-only is preserved: codegraph keeps a SQLite graph on
 // disk and makes no network calls (no API keys), so BYO-key/local-only holds.
 
+import { execFileSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { listMcpServers, saveMcpServer, type McpServerEntry } from './mcp'
 
 export interface BundledMcpServer {
@@ -69,6 +72,48 @@ export const MCP_PACK: BundledMcpServer[] = [
   }
 ]
 
+/**
+ * Windows spawn fix. npm installs `codegraph` as a bare POSIX shim + a `codegraph.cmd`
+ * shim; there is no real `codegraph.exe`. Forge passes this config to the SDK, which spawns
+ * stdio MCP servers WITHOUT a shell — and Node 20.12+/22.12+/24 refuses to spawn `.cmd`/`.bat`
+ * without one (a known CVE mitigation). So `command: 'codegraph'` resolves to a shim that
+ * either can't run on Windows or is blocked, and the server shows up as "failed".
+ *
+ * Fix: resolve the package's real JS entry (`npm-shim.js`) from wherever `codegraph` lives on
+ * PATH and run it directly with node.exe — bypassing shims, shells and PATHEXT entirely. Fully
+ * dynamic (no hard-coded user paths); falls back to the bare command if anything can't be
+ * resolved (non-Windows, or unusual installs), so behaviour never regresses elsewhere.
+ */
+function resolveEntryForPlatform(entry: McpServerEntry): McpServerEntry {
+  if (process.platform !== 'win32') return entry
+  if (entry.transport !== 'stdio' || entry.command !== 'codegraph') return entry
+  const firstLine = (out: string): string =>
+    out
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter(Boolean)[0] ?? ''
+  try {
+    const launcher = firstLine(execFileSync('where', ['codegraph'], { encoding: 'utf8' }))
+    if (!launcher) return entry
+    const binDir = dirname(launcher)
+    const shim = join(binDir, 'node_modules', '@colbymchenry', 'codegraph', 'npm-shim.js')
+    if (!existsSync(shim)) return entry
+    // Prefer a node.exe sitting next to the shim (common with version managers); else fall
+    // back to node on PATH, then to the bare 'node' name as a last resort.
+    let node = join(binDir, 'node.exe')
+    if (!existsSync(node)) {
+      try {
+        node = firstLine(execFileSync('where', ['node'], { encoding: 'utf8' })) || 'node'
+      } catch {
+        node = 'node'
+      }
+    }
+    return { ...entry, command: node, args: [shim, ...(entry.args ?? [])] }
+  } catch {
+    return entry
+  }
+}
+
 /** The pack, each annotated with whether a server of that name is already registered. */
 export async function listBundledMcpServers(): Promise<BundledMcpStatus[]> {
   let installed: McpServerEntry[]
@@ -94,7 +139,7 @@ export async function installBundledMcpServer(name: string): Promise<InstallBund
   if (existing.some((s) => s.name === bundled.name)) {
     return { ok: true, servers: existing, alreadyInstalled: true }
   }
-  const res = await saveMcpServer(bundled.entry)
+  const res = await saveMcpServer(resolveEntryForPlatform(bundled.entry))
   if (!res.ok) return res
   return { ok: true, servers: res.servers, alreadyInstalled: false }
 }

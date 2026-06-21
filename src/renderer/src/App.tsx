@@ -11,11 +11,11 @@ import CostView from './components/cost/CostView'
 import GuideView from './components/guide/GuideView'
 import ThemeView from './components/theme/ThemeView'
 import NotesView from './components/notes/NotesView'
+import GraphMapView from './components/graphmap/GraphMapView'
 import PersonaModal from './components/persona/PersonaModal'
 import CommandPalette, { type PaletteAction } from './components/palette/CommandPalette'
 import ShortcutsHelp from './components/ShortcutsHelp'
 import ConversationSearch from './components/ConversationSearch'
-import WorkspaceFiles from './components/WorkspaceFiles'
 import Settings from './components/Settings'
 import { ConfirmProvider, useConfirm } from './components/ConfirmDialog'
 import type {
@@ -73,6 +73,12 @@ export default function App(): JSX.Element {
 
 /* TitleBar → ./components/TitleBar · PersonaModal → ./components/persona/PersonaModal */
 
+/** Last path segment of a folder path, for compact display in the chat tab bar. */
+function folderName(p: string): string {
+  const parts = p.split(/[\\/]/).filter(Boolean)
+  return parts[parts.length - 1] ?? p
+}
+
 function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): JSX.Element {
   const [caps, setCaps] = useState<Capabilities | null>(null)
   const [model, setModel] = useState<string>('default')
@@ -112,6 +118,7 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
     setTabEffort,
     setTabPersona,
     setTabMcpScope,
+    setTabProjectRoot,
     closeTab,
     tabTitle,
     clearTabsForSession,
@@ -139,7 +146,7 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
   useEffect(() => saveJson('forge-auto-compact', autoCompact), [autoCompact])
   useEffect(() => saveJson('forge-lazy-level', lazyLevel), [lazyLevel])
   const [view, setView] = useState<
-    'chat' | 'squad' | 'cost' | 'extend' | 'guide' | 'theme' | 'notes'
+    'chat' | 'squad' | 'cost' | 'extend' | 'guide' | 'theme' | 'notes' | 'graphmap'
   >('chat')
   // Debug stream — starts collecting agent events immediately on login (zero extra
   // tokens). Data flows to SquadView (Inspect button) and DebugSidePanel (chat).
@@ -150,7 +157,6 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
   const [paletteOpen, setPaletteOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [searchAllOpen, setSearchAllOpen] = useState(false)
-  const [wsFilesOpen, setWsFilesOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const confirm = useConfirm()
   // Pinned conversations (local — sorted first in the sidebar). The SDK owns the
@@ -304,6 +310,14 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
     onClear()
   }
 
+  // Choose the active conversation's working folder (its agent cwd). Picking a real
+  // project folder lets the chat work on actual on-disk files and, when that folder
+  // is codegraph-indexed, lights up the codegraph MCP + the GraphMAP tab.
+  async function chooseWorkingFolder(): Promise<void> {
+    const dir = await window.forge.dialog.pickFolder()
+    if (dir) setTabProjectRoot(activeKey, dir)
+  }
+
   // Cmd/Ctrl+K toggles the command palette.
   useEffect(() => {
     function onKey(e: KeyboardEvent): void {
@@ -336,6 +350,7 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
       go('Guide', 'guide'),
       go('Theme', 'theme'),
       go('Notes', 'notes'),
+      go('GraphMAP', 'graphmap'),
       { id: 'new', section: 'Session', label: 'New conversation', hint: '/new', run: newSession },
       {
         id: 'search-all',
@@ -343,13 +358,6 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
         label: 'Search all conversations…',
         keywords: 'find across history transcript',
         run: () => setSearchAllOpen(true)
-      },
-      {
-        id: 'workspace-files',
-        section: 'Session',
-        label: 'Workspace files (this conversation)…',
-        keywords: 'edits diff files changed',
-        run: () => setWsFilesOpen(true)
       },
       {
         id: 'persona',
@@ -511,6 +519,13 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
             <Icon name="notes" />
             NOTES
           </button>
+          <button
+            className={`mode-tab ${view === 'graphmap' ? 'on' : ''}`}
+            onClick={() => setView('graphmap')}
+          >
+            <Icon name="graphmap" />
+            GRAPHMAP
+          </button>
         </div>
         <div className="view-body">
           <div className="view-pane chat-pane" style={{ display: view === 'chat' ? 'flex' : 'none' }}>
@@ -545,13 +560,37 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
               >
                 ＋
               </button>
-              <button
-                className="chat-tab-new"
-                title="Workspace files edited in this conversation"
-                onClick={() => setWsFilesOpen(true)}
+              {/* Working folder: where this conversation's agent runs. Default is an
+                  isolated per-chat workspace; pick a real project folder to work on
+                  its files (and light up codegraph / GraphMAP for that folder). */}
+              <div
+                className="chat-ws"
+                title={
+                  activeTab?.projectRoot
+                    ? `Working folder: ${activeTab.projectRoot}`
+                    : 'Working in an isolated workspace. Click to choose a project folder to work in.'
+                }
               >
-                ⌗
-              </button>
+                <button
+                  className={`chat-ws-pick ${activeTab?.projectRoot ? 'on' : ''}`}
+                  onClick={() => void chooseWorkingFolder()}
+                >
+                  <Icon name="folder" />
+                  <span className="chat-ws-label">
+                    {activeTab?.projectRoot ? folderName(activeTab.projectRoot) : 'Isolated'}
+                  </span>
+                </button>
+                {activeTab?.projectRoot && (
+                  <button
+                    className="chat-ws-clear"
+                    title="Use an isolated workspace"
+                    aria-label="Clear working folder"
+                    onClick={() => setTabProjectRoot(activeKey, null)}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
               {/* Debug monitor toggle: opens DebugSidePanel to the right of chat */}
               <button
                 className={`chat-tab-new dbg-toggle${debugPanelOpen ? ' dbg-toggle-on' : ''}`}
@@ -591,6 +630,7 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
                     lazyLevel={lazyLevel}
                     onResult={onResult}
                     workspaceId={t.key}
+                    projectRoot={t.projectRoot}
                     isActive={t.key === activeKey}
                     convPersona={t.persona}
                     mcpScope={t.mcpScope}
@@ -638,6 +678,12 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
           <div className="view-pane" style={{ display: view === 'notes' ? 'flex' : 'none' }}>
             <NotesView />
           </div>
+          <div
+            className="view-pane"
+            style={{ display: view === 'graphmap' ? 'flex' : 'none' }}
+          >
+            <GraphMapView active={view === 'graphmap'} chatFolder={activeTab?.projectRoot} />
+          </div>
         </div>
       </main>
       {paletteOpen && (
@@ -646,9 +692,6 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
       {shortcutsOpen && <ShortcutsHelp onClose={() => setShortcutsOpen(false)} />}
       {searchAllOpen && (
         <ConversationSearch onOpen={resumeSession} onClose={() => setSearchAllOpen(false)} />
-      )}
-      {wsFilesOpen && activeTab && (
-        <WorkspaceFiles workspaceId={activeTab.key} onClose={() => setWsFilesOpen(false)} />
       )}
       {settingsOpen && (
         <Settings

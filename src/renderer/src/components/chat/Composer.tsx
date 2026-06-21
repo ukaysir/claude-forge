@@ -69,6 +69,7 @@ export default function Composer({
   onSetPermission,
   onNewSession,
   workspaceId,
+  projectRoot,
   isActive = true,
   convPersona,
   mcpScope,
@@ -118,6 +119,9 @@ export default function Composer({
   /** Isolated workspace id for this conversation (per-tab) — keeps concurrent
    * conversations from editing the same files. Threaded into every run. */
   workspaceId?: string
+  /** This conversation's chosen working folder (project root). When set, the run
+   * uses it as cwd instead of the isolated workspace; undefined ⇒ isolated. */
+  projectRoot?: string
   /** True when this is the visible tab. All tabs stay mounted (so background
    * conversations keep streaming), so global side effects (Cmd+F, focus) must be
    * gated on this to avoid firing in every tab at once. */
@@ -419,6 +423,9 @@ export default function Composer({
     if (runEffort) opts.effort = runEffort
     if (runModel && runModel !== 'default') opts.model = runModel
     if (workspaceId) opts.workspaceId = workspaceId
+    // An explicit working folder (chosen in the chat tab bar) runs the agent on a
+    // real on-disk project instead of the isolated workspace; fresh runs only.
+    if (projectRoot) opts.projectRoot = projectRoot
     // Per-conversation persona override (set via /persona) — a stable systemPrompt
     // for THIS conversation, so it doesn't bust the cache (constant across turns)
     // and overrides the global persona resolved in the main process.

@@ -40,10 +40,15 @@ import type { ProviderEntry, ProviderSaveInput, ProviderSaveResult } from '../ma
 import type { ActivitySnapshot } from '../main/agentActivity'
 import type { KeywordMatch } from '../main/keywords'
 import type { LazyLevel } from '../main/lazy'
-import type { WorkspaceFile } from '../main/workspace'
 import type { MemoryEntry } from '../main/memory'
 import type { Note, NoteInput } from '../main/notes/store'
-import type { RepoMapResult } from '../main/repomap'
+import type {
+  GraphStatus,
+  GraphData,
+  SymbolRow,
+  SearchHit,
+  OverviewOpts
+} from '../main/codegraph'
 
 /** The safe surface exposed to the renderer as window.forge. */
 const forge = {
@@ -171,6 +176,23 @@ const forge = {
     maximize: (): Promise<void> => ipcRenderer.invoke('window:maximize'),
     close: (): Promise<void> => ipcRenderer.invoke('window:close')
   },
+  dialog: {
+    /** Native folder picker. Resolves to the chosen absolute path, or null if canceled. */
+    pickFolder: (): Promise<string | null> => ipcRenderer.invoke('dialog:pick-folder')
+  },
+  graphmap: {
+    /** Index status + counts for a project root (its `.codegraph/` graph). */
+    status: (root: string): Promise<GraphStatus> => ipcRenderer.invoke('codegraph:status', root),
+    /** Aggregated directory- or file-level dependency graph for a root. */
+    overview: (root: string, opts?: OverviewOpts): Promise<GraphData> =>
+      ipcRenderer.invoke('codegraph:overview', root, opts ?? {}),
+    /** Symbols defined in one file (detail panel / file drill-in). */
+    symbols: (root: string, file: string): Promise<SymbolRow[]> =>
+      ipcRenderer.invoke('codegraph:symbols', root, file),
+    /** Substring search over symbol names (jump box). */
+    search: (root: string, query: string): Promise<SearchHit[]> =>
+      ipcRenderer.invoke('codegraph:search', root, query)
+  },
   pet: {
     /** Current enabled state of the desktop pet. */
     getEnabled: (): Promise<boolean> => ipcRenderer.invoke('pet:get-enabled'),
@@ -178,15 +200,6 @@ const forge = {
     setEnabled: (on: boolean): Promise<boolean> => ipcRenderer.invoke('pet:set-enabled', on),
     /** Toggle the pet; resolves to the new enabled state. */
     toggle: (): Promise<boolean> => ipcRenderer.invoke('pet:toggle')
-  },
-  workspace: {
-    /** List files the agent created/edited in a conversation's isolated workspace. */
-    list: (id: string): Promise<WorkspaceFile[]> => ipcRenderer.invoke('workspace:list', id),
-    /** Read one workspace file's contents (capped). */
-    read: (id: string, rel: string): Promise<string> =>
-      ipcRenderer.invoke('workspace:read', id, rel),
-    /** Structural repo map of the conversation's workspace (Understand-Anything). */
-    repoMap: (id: string): Promise<RepoMapResult> => ipcRenderer.invoke('workspace:repo-map', id)
   },
   memory: {
     /** Browse auto-captured project memory (newest first). */

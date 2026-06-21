@@ -76,9 +76,6 @@ Exposes `window.forge` = `{ auth, agent.{start,interrupt,respondPermission,respo
 - `lib/` — pure, side-effect-free helpers/types (the bulk of them covered by `npm run test`): `blocks.ts` (`reduceBlocks`/`parseTodos`/`deriveTasks`), `format.ts`, `export.ts` (Markdown/JSON transcript export), `goal.ts` (`/goal` directive + `GOAL_ACHIEVED` detection), `slashCommands.ts` (client-side slash-command dispatcher), `composer.ts` (Composer pure helpers), `storage.ts` (typed localStorage), `constants.ts` (`EFFORTS`/`PERMS`), `types.ts`.
 - `styles.css` — a thin **`@import` index**; the real CSS lives in `styles/` partials (`00-core`, `01-auth`, `02-sidebar`, `03-chat`, `04-extend`, `05-squad`, `06-guide`, `07-cost`, `08-palette`, `09-debug`, `10-theme`) split by section for maintainability. Theme vars (`--bg #0b0a09`, `--amber #e8932a`, Pretendard mono). **Edit the partials, not the index.** The CSS-nesting brace footgun (Gotchas) applies per partial — sanity-check brace balance after editing.
 
-### Vendored reference — `new_folder/oh-my-claudecode/`
-A **read-only checked-in copy** of the upstream `oh-my-claudecode` project, kept purely as the **reference source** for the native ports in `roles.ts` / `keywords.ts` / `loop.ts`. It is not built or imported by the app. Don't ship features by depending on it at runtime — port the portable core into pure Forge modules.
-
 ## Commands
 A `.npmrc` sets `script-shell` to Git Bash and every `package.json` script invokes its tool through an explicit `node node_modules/.../bin` path, so `npm run <script>` works even on the locked-down Windows box (it no longer routes through the blocked `cmd.exe`). On the Windows env, prefix with the PATH export (see below).
 
@@ -164,7 +161,6 @@ Two env-specific hurdles (`bootstrap/patch-app-builder.mjs` handles the first; b
 - **Goose delegation guardrails**: the `delegate` MCP tool routes to goose only — never redirect the SDK's native Task subagents (they run inside `claude.exe`). Delegated subtasks are **read-only by default** (builder roles opt in); the permission gate in `runGooseSubtask.ts` is **fail-closed** until the live `session/request_permission` shape is confirmed. No free-form agent-to-agent chat (hub-and-spoke through Claude only). The goose binary is git-ignored (`resources/goose/`), fetched at build by `scripts/ensure-goose.mjs`.
 - Squad / orchestration subtasks default to **read-only** (`subtaskRunner` tool gate). Only explicit write-capable roles (`roles.ts`) may mutate the workspace; `Task` and `AskUserQuestion` are always denied to subtasks. The global **max $/run** budget cap is enforced by the conductor's budget governor (N subtasks multiply cost — the governor projects spend before each step and hard-stops).
 - MCP servers, plugins, and skill-toggles must stay **out of `.claude/`** (in Forge-private `forge-*.json`) so secrets aren't model-readable.
-- `new_folder/oh-my-claudecode/` is **vendored reference only** — port its ideas into pure Forge modules; don't import or build it at runtime.
 - Orchestration honesty: the eval (`eval.ts`/`scripts/eval.mjs`) compares orchestrated vs single-agent at the **same compute budget**. Winning by spending more is not a win — keep `gateVerdict` honest and don't cherry-pick task mixes.
 
 ## Status

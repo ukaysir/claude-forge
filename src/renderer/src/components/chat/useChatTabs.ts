@@ -25,6 +25,9 @@ export interface ChatTab {
   /** Per-conversation MCP-server scope: names of the configured servers to load
    * for this chat. undefined ⇒ all (default); trims the per-turn MCP tax. */
   mcpScope?: string[]
+  /** Per-conversation working folder (project root). When set, the agent runs with
+   * this as cwd instead of the isolated workspace. undefined ⇒ isolated (default). */
+  projectRoot?: string
 }
 
 export const MAX_TABS = 5
@@ -38,6 +41,7 @@ interface SessionOpts {
   effort?: EffortLabel
   persona?: string
   mcpScope?: string[]
+  projectRoot?: string
 }
 
 /** Stable workspace id for a resumed session (so it reuses the dir where it did
@@ -98,6 +102,7 @@ export interface ChatTabs {
   setTabEffort: (key: string, value: EffortLabel | 'GLOBAL') => void
   setTabPersona: (key: string, persona: string | null) => void
   setTabMcpScope: (key: string, scope: string[] | null) => void
+  setTabProjectRoot: (key: string, root: string | null) => void
   closeTab: (key: string) => void
   tabTitle: (t: ChatTab) => string
   /** Reset any open tab showing a (deleted) conversation to a fresh one. */
@@ -145,7 +150,8 @@ export function useChatTabs(opts: {
       model: saved.model,
       effort: saved.effort,
       persona: saved.persona,
-      mcpScope: saved.mcpScope
+      mcpScope: saved.mcpScope,
+      projectRoot: saved.projectRoot
     }
     const active = tabs.find((t) => t.key === activeKey)
     if ((active && active.sessionId === null) || tabs.length >= MAX_TABS) {
@@ -180,7 +186,8 @@ export function useChatTabs(opts: {
         model: t.model,
         effort: t.effort,
         persona: t.persona,
-        mcpScope: t.mcpScope
+        mcpScope: t.mcpScope,
+        projectRoot: t.projectRoot
       })
     setTabs((prev) => prev.map((x) => (x.key === key ? { ...x, sessionId: sid } : x)))
   }
@@ -217,6 +224,14 @@ export function useChatTabs(opts: {
     const t = tabs.find((x) => x.key === key)
     if (t?.sessionId) saveSessionOpts(t.sessionId, { mcpScope: next })
     setTabs((prev) => prev.map((x) => (x.key === key ? { ...x, mcpScope: next } : x)))
+  }
+  /** Set/clear a tab's working folder (project root). null ⇒ isolated workspace
+   * (the default). Persisted per-session so it survives restart + resume. */
+  function setTabProjectRoot(key: string, root: string | null): void {
+    const next = root || undefined
+    const t = tabs.find((x) => x.key === key)
+    if (t?.sessionId) saveSessionOpts(t.sessionId, { projectRoot: next })
+    setTabs((prev) => prev.map((x) => (x.key === key ? { ...x, projectRoot: next } : x)))
   }
   /** Close a tab (always keep at least one); focus a neighbor if it was active. */
   function closeTab(key: string): void {
@@ -256,6 +271,7 @@ export function useChatTabs(opts: {
     setTabEffort,
     setTabPersona,
     setTabMcpScope,
+    setTabProjectRoot,
     closeTab,
     tabTitle,
     clearTabsForSession,

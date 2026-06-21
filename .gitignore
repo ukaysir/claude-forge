@@ -1,8 +1,10 @@
 node_modules/
 dist/
+dist2/
 out/
 out-selftest/
 out-test/
+.codegraph/
 *.log
 .env
 .env.local

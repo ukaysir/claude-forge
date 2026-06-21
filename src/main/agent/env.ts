@@ -91,6 +91,20 @@ export async function ensureResumeCwd(dir: string): Promise<string> {
   }
 }
 
+/**
+ * Make an explicit, user-chosen project folder usable as a run cwd: ensure it
+ * exists and carries the shared root `.claude` (junction on Windows, symlink
+ * elsewhere) so Forge's Skills/Commands/Agents/settings still load there. If the
+ * folder already has its own `.claude`, it is left untouched (a real project's
+ * config wins). Falls back to the shared root on any failure (never blocks a run).
+ *
+ * Semantically identical to ensureResumeCwd, exposed under an intent-revealing
+ * name for the "set working folder" chat feature (a fresh run, not a resume).
+ */
+export async function ensureProjectCwd(dir: string): Promise<string> {
+  return ensureResumeCwd(dir)
+}
+
 export function ensureWorkspace(id?: string): Promise<string> {
   const key = id && id.trim() ? id.trim().replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64) : ''
   let p = workspaceReady.get(key)

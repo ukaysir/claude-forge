@@ -11,9 +11,10 @@ import { register as registerOrchestrate } from './orchestrate'
 import { register as registerActivity } from './activity'
 import { register as registerMemory } from './memory'
 import { register as registerNotes } from './notes'
-import { register as registerWorkspace } from './workspace'
 import { register as registerWindow } from './window'
 import { register as registerPet } from './pet'
+import { register as registerDialog } from './dialog'
+import { register as registerCodegraph } from './codegraph'
 
 /** Register every ipcMain.handle channel, grouped by domain. */
 export function registerAll(ipc: IpcMain): void {
@@ -25,7 +26,8 @@ export function registerAll(ipc: IpcMain): void {
   registerActivity(ipc)
   registerMemory(ipc)
   registerNotes(ipc)
-  registerWorkspace(ipc)
   registerWindow(ipc)
   registerPet(ipc)
+  registerDialog(ipc)
+  registerCodegraph(ipc)
 }

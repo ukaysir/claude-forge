@@ -43,7 +43,6 @@ export type KeywordMatch = import('../../main/keywords').KeywordMatch
 export type LazyLevel = import('../../main/lazy').LazyLevel
 /** Persisted lazy-mode setting: the three intensities plus an explicit off. */
 export type LazySetting = LazyLevel | 'off'
-export type WorkspaceFile = import('../../main/workspace').WorkspaceFile
 export type MemoryEntry = import('../../main/memory').MemoryEntry
 export type MemoryKind = import('../../main/memory').MemoryKind
 

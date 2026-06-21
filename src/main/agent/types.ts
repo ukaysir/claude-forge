@@ -45,6 +45,15 @@ export interface RunOptions {
    */
   workspaceId?: string
   /**
+   * Explicit working folder for the run. When set (and not resuming), the agent
+   * runs with this directory as cwd instead of the isolated per-conversation
+   * workspace — so a chat can operate on a real project on disk (its files, its
+   * `.codegraph/` index, etc.). The shared `.claude/` config is linked in only if
+   * the folder has none, so Forge skills/settings still load without clobbering a
+   * project that ships its own. Absent → isolated workspace (unchanged default).
+   */
+  projectRoot?: string
+  /**
    * Named subagents the lead may delegate to via the Task tool (SDK `agents`
    * option). Enables orchestrator-worker topologies. Omitted → no delegation,
    * i.e. identical to current behavior. (docs/SQUAD_ORCHESTRATION.md §6)

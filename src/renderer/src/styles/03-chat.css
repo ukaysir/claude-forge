@@ -79,6 +79,68 @@
   opacity: 0.35;
   cursor: not-allowed;
 }
+/* Working-folder chip in the chat tab strip — chooses the agent's cwd for this
+   conversation. Default "Isolated"; set it to a real project folder to work on
+   its files (and light up codegraph + GraphMAP for that folder). */
+.chat-ws {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 6px;
+}
+.chat-ws-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 9px;
+  transition: all var(--dur-1) var(--ease-out);
+}
+.chat-ws-pick .icon {
+  font-size: 1.1em;
+  color: var(--faint);
+}
+.chat-ws-pick:hover {
+  color: var(--text);
+  border-color: var(--amber-dim);
+}
+.chat-ws-pick:hover .icon {
+  color: var(--amber);
+}
+.chat-ws-pick.on {
+  color: var(--amber-bright);
+  border-color: rgba(var(--accent-rgb), 0.5);
+  background: rgba(var(--accent-rgb), 0.08);
+}
+.chat-ws-pick.on .icon {
+  color: var(--amber);
+}
+.chat-ws-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 130px;
+}
+.chat-ws-clear {
+  border: none;
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 5px;
+  transition: color var(--dur-1) var(--ease-out);
+}
+.chat-ws-clear:hover {
+  color: var(--danger);
+}
 .chat-tab-pane {
   flex-direction: column;
   min-height: 0;

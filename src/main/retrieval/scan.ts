@@ -1,12 +1,42 @@
-// Filesystem content scan for RAG retrieval. Unlike repomap/scan (which parses
-// files into structural symbols and discards the text), this keeps the raw
-// content so it can be chunked + BM25-indexed. fs/path only — no electron — and
-// kept apart from the pure chunker that `npm test` covers (disk walks aren't
-// unit-testable headlessly). Best-effort; never throws.
+// Filesystem content scan for RAG retrieval: keeps each source file's raw content
+// so it can be chunked + BM25-indexed (rather than reduced to a structural map).
+// fs/path only — no electron — and kept apart from the pure chunker that `npm test`
+// covers (disk walks aren't unit-testable headlessly). Best-effort; never throws.
 
 import { promises as fs } from 'fs'
 import { join, relative } from 'path'
-import { detectLang } from '../repomap/parse'
+
+// Source-language detection by file extension. Inlined here (it formerly lived in
+// the removed repomap module) so RAG retrieval stays self-contained. We only need
+// "is this a source file?" — anything unknown maps to 'other' and is skipped.
+type Lang = 'ts' | 'tsx' | 'js' | 'jsx' | 'py' | 'go' | 'rs' | 'java' | 'rb' | 'other'
+function detectLang(path: string): Lang {
+  const m = /\.([a-z0-9]+)$/i.exec(path)
+  switch ((m?.[1] ?? '').toLowerCase()) {
+    case 'ts':
+      return 'ts'
+    case 'tsx':
+      return 'tsx'
+    case 'js':
+    case 'cjs':
+    case 'mjs':
+      return 'js'
+    case 'jsx':
+      return 'jsx'
+    case 'py':
+      return 'py'
+    case 'go':
+      return 'go'
+    case 'rs':
+      return 'rs'
+    case 'java':
+      return 'java'
+    case 'rb':
+      return 'rb'
+    default:
+      return 'other'
+  }
+}
 
 const SKIP_DIRS = new Set([
   'node_modules', '.git', '.claude', 'ws', 'dist', 'out', 'out-test', 'out-selftest',

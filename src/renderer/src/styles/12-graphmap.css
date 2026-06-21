@@ -1,0 +1,540 @@
+/* GraphMAP tab — a visual code map rendered from a project's codegraph index.
+   Rides the same design tokens as the rest of the app: warm-charcoal surfaces,
+   the single low-chroma brass accent, hairline borders that escalate by color.
+   The graph itself is hand-rolled SVG (see GraphMapView.tsx); these rules theme
+   the chrome (bar, toolbar, detail panel, empty states) and the SVG primitives. */
+
+.gm-root {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+/* ── top bar ── */
+.gm-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-raised);
+}
+.gm-bar-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+.gm-bar-mark {
+  font-size: 1.3em;
+  color: var(--amber);
+}
+.gm-bar-sub {
+  margin-left: 4px;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--faint);
+}
+.gm-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* search */
+.gm-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--faint);
+}
+.gm-search:focus-within {
+  border-color: var(--amber);
+}
+.gm-search input {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  outline: none;
+  width: 150px;
+}
+.gm-hits {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--bg-float);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  box-shadow: var(--shadow-pop);
+}
+.gm-hit {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+.gm-hit:hover {
+  background: rgba(var(--accent-rgb), 0.1);
+}
+.gm-hit-name {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+}
+.gm-hit-kind {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--amber);
+}
+.gm-hit-file {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+/* folder buttons */
+.gm-folder {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all var(--dur-1) var(--ease-out);
+}
+.gm-folder .icon {
+  color: var(--amber);
+  font-size: 1.05em;
+}
+.gm-folder:hover {
+  border-color: var(--amber-dim);
+}
+.gm-folder.ghosty {
+  background: transparent;
+  color: var(--muted);
+}
+.gm-folder.ghosty:hover {
+  color: var(--amber-bright);
+}
+.gm-folder-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+/* ── body: canvas + detail ── */
+.gm-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.gm-canvas-wrap {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.gm-toolbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-deep);
+}
+.gm-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  min-width: 0;
+}
+.gm-crumb {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.gm-crumb:hover {
+  color: var(--amber-bright);
+}
+.gm-crumb.on {
+  color: var(--amber-bright);
+  cursor: default;
+}
+.gm-crumb-sep {
+  color: var(--faint);
+}
+.gm-filters {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.gm-filter {
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+  transition: all var(--dur-1) var(--ease-out);
+}
+.gm-filter:hover {
+  color: var(--text);
+  border-color: var(--amber-dim);
+}
+.gm-filter.on {
+  color: var(--amber);
+  border-color: rgba(var(--accent-rgb), 0.45);
+  background: rgba(var(--accent-rgb), 0.1);
+}
+.gm-reset {
+  color: var(--muted);
+}
+
+/* ── the SVG canvas ── */
+.gm-svg {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  cursor: grab;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(var(--accent-rgb), 0.05), transparent 60%),
+    var(--bg);
+  touch-action: none;
+}
+.gm-svg:active {
+  cursor: grabbing;
+}
+/* The circular frame the cloud settles inside (see computeLayout / FRAME_R). */
+.gm-frame {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 2 7;
+  opacity: 0.5;
+  pointer-events: none;
+}
+.gm-edge {
+  stroke: var(--amber-dim);
+  opacity: 0.4;
+}
+.gm-edge.sel {
+  stroke: var(--amber);
+  opacity: 0.9;
+}
+.gm-arrow-head {
+  fill: var(--amber-dim);
+}
+.gm-node {
+  cursor: grab;
+}
+.gm-node.held {
+  cursor: grabbing;
+}
+/* The grabbed node rides above the cloud and gets the active accent ring. */
+.gm-node.held .gm-node-dot {
+  fill: rgba(var(--accent-rgb), 0.24);
+  stroke: var(--amber-bright);
+  stroke-width: 2;
+}
+.gm-node.held .gm-node-label {
+  fill: var(--amber-bright);
+}
+.gm-node-dot {
+  fill: var(--bg-card);
+  stroke: var(--amber-dim);
+  stroke-width: 1.5;
+  transition:
+    fill var(--dur-1) var(--ease-out),
+    stroke var(--dur-1) var(--ease-out);
+}
+.gm-node.dir .gm-node-dot {
+  fill: rgba(var(--accent-rgb), 0.12);
+  stroke: var(--amber);
+}
+.gm-node:hover .gm-node-dot {
+  fill: rgba(var(--accent-rgb), 0.18);
+  stroke: var(--amber-bright);
+}
+.gm-node.on .gm-node-dot {
+  fill: rgba(var(--accent-rgb), 0.22);
+  stroke: var(--amber-bright);
+  stroke-width: 2;
+}
+.gm-node-label {
+  fill: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.gm-node:hover .gm-node-label,
+.gm-node.on .gm-node-label {
+  fill: var(--amber-bright);
+}
+
+.gm-note {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--bg-float);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.gm-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ── detail panel (file → symbols) ── */
+.gm-detail {
+  flex: none;
+  width: 340px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: var(--bg-raised);
+}
+.gm-detail-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.gm-detail-head .icon {
+  color: var(--amber);
+}
+.gm-detail-path {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.gm-detail-x {
+  flex: none;
+  border: none;
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 4px;
+}
+.gm-detail-x:hover {
+  color: var(--danger);
+}
+.gm-detail-loading {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+.gm-detail-empty {
+  padding: 16px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.gm-symbols {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+}
+.gm-symbol {
+  padding: 7px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+.gm-symbol:hover {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+.gm-symbol-head {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.gm-symbol-kind {
+  font-size: 9.5px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--info);
+  flex: none;
+}
+.gm-symbol-kind.k-function,
+.gm-symbol-kind.k-method {
+  color: var(--amber);
+}
+.gm-symbol-kind.k-class,
+.gm-symbol-kind.k-interface,
+.gm-symbol-kind.k-type_alias {
+  color: var(--ok);
+}
+.gm-symbol-name {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.gm-symbol-ex {
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--on-accent);
+  background: var(--amber);
+  border-radius: 4px;
+  padding: 1px 4px;
+  flex: none;
+}
+.gm-symbol-line {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 10.5px;
+  color: var(--faint);
+  flex: none;
+}
+.gm-symbol-sig {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+/* ── empty / CTA states ── */
+.gm-empty {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px;
+  text-align: center;
+}
+.gm-empty-mark {
+  font-size: 44px;
+  color: var(--amber-dim);
+  margin-bottom: 6px;
+}
+.gm-empty-title {
+  font-size: 15px;
+  color: var(--text);
+  margin: 0;
+}
+.gm-empty-line {
+  margin: 0;
+  max-width: 440px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.gm-empty-code {
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--amber-bright);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  user-select: text;
+}
+.gm-empty-cta {
+  margin-top: 10px;
+  padding: 8px 16px;
+  border: 1px solid var(--amber-dim);
+  border-radius: 8px;
+  background: var(--amber);
+  color: var(--on-accent);
+  font-weight: 600;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background var(--dur-1) var(--ease-out);
+}
+.gm-empty-cta:hover {
+  background: var(--amber-bright);
+}
+
+/* spinner — reuses the shared `spin` keyframe (defined in 03-chat.css). */
+.gm-spin {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--amber) 30%, transparent);
+  border-top-color: var(--amber);
+  animation: spin 0.7s linear infinite;
+}

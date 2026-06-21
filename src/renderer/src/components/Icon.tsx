@@ -27,6 +27,8 @@ export type IconName =
   | 'scale'
   | 'file'
   | 'pet'
+  | 'folder'
+  | 'graphmap'
 
 const PATHS: Record<IconName, JSX.Element> = {
   chat: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
@@ -174,6 +176,22 @@ const PATHS: Record<IconName, JSX.Element> = {
       <circle cx="10" cy="7.2" r="1.7" />
       <circle cx="14" cy="7.2" r="1.7" />
       <circle cx="17.4" cy="11" r="1.7" />
+    </>
+  ),
+  // Folder with tab — the chat working-folder picker (and GraphMAP root).
+  folder: (
+    <path d="M3 7a2 2 0 0 1 2-2h3.6a2 2 0 0 1 1.4.6L11.8 7H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+  ),
+  // Node-link graph — the GraphMAP tab. Three ringed nodes joined by edges, in
+  // the same line family so it tracks currentColor like every other icon.
+  graphmap: (
+    <>
+      <line x1="7.4" y1="6.6" x2="15.4" y2="8.2" />
+      <line x1="6.6" y1="8" x2="8.4" y2="15.4" />
+      <line x1="10.8" y1="16.6" x2="16.2" y2="9.6" />
+      <circle cx="6" cy="6" r="2.3" />
+      <circle cx="18" cy="8.4" r="2.3" />
+      <circle cx="9.2" cy="18" r="2.3" />
     </>
   )
 }

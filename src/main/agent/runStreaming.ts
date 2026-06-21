@@ -15,13 +15,12 @@ import { toSdkMcpServers } from '../mcp'
 import { toSdkPlugins } from '../plugins'
 import { enabledProviders } from '../providers'
 import { buildDelegateServer } from '../goose/delegateTool'
-import { buildEnv, ensureWorkspace, ensureResumeCwd, SETTING_SOURCES } from './env'
+import { buildEnv, ensureWorkspace, ensureResumeCwd, ensureProjectCwd, SETTING_SOURCES } from './env'
 import { getSessionCwd } from './sessions'
 import { resultErrorMessage, singlePrompt, toolContentToString } from './helpers'
 import { active, pendingDialogs, pendingPerms } from './state'
 import { emitAgentEvent } from '../pet/bus'
 import { buildMemoryInjection, buildMemoryServer, isMemoryToolsEnabled, noteRunWorkspace } from '../memory'
-import { buildRepoMapInjection } from '../repomap'
 import { buildRetrievalInjection } from '../retrieval'
 import { estimateTokens } from '../efficiency/compress'
 import type { ActiveQuery, AgentEvent, AgentEventBody, QuestionResult, RunOptions } from './types'
@@ -48,12 +47,16 @@ export async function runStreaming(
   //    isolation, or whose session→ws map was lost on restart → a random fallback
   //    key), which is why the transcript loads but a follow-up turn errored. Anchor
   //    to the session's recorded cwd when known.
+  //  - Else an explicit projectRoot (the chat's chosen working folder) → run there
+  //    so the agent operates on a real on-disk project (its files + `.codegraph/`).
   //  - Otherwise → the tab's isolated per-conversation workspace (workspaceId), so
   //    concurrent conversations don't edit the same files; else the shared root.
   const recordedCwd = opts.resume ? await getSessionCwd(opts.resume) : undefined
   const cwd = recordedCwd
     ? await ensureResumeCwd(recordedCwd)
-    : await ensureWorkspace(opts.workspaceId)
+    : opts.projectRoot
+      ? await ensureProjectCwd(opts.projectRoot)
+      : await ensureWorkspace(opts.workspaceId)
 
   // Phase 0: read the filesystem `.claude/` (skills · commands · agents ·
   // settings · hooks · mcp). Without settingSources the SDK runs hermetic and
@@ -172,14 +175,13 @@ export async function runStreaming(
   let injectedTokens = 0
   if (!opts.resume) {
     // Both are no-ops until there's something to inject (empty memory / empty
-    // workspace), and both are budget-bounded + compressed. Repo map first
-    // (stable structure), then recalled memory (query-relevant facts).
+    // workspace), and both are budget-bounded + compressed. RAG passages first,
+    // then recalled memory (query-relevant facts). Structural code navigation is
+    // now served on demand by the codegraph MCP, not an up-front injection.
     const blocks: string[] = []
-    const repo = await buildRepoMapInjection(cwd)
-    if (repo.text) blocks.push(repo.text)
     // RAG (docs/TOKEN_OPTIMIZATION.md §11): top-k workspace content chunks relevant
     // to the prompt. Naturally gated — injects nothing when the query has no term
-    // overlap — so it complements the structural repo map with actual code passages.
+    // overlap — so it supplies actual code passages without an up-front dump.
     const rag = await buildRetrievalInjection(cwd, prompt)
     if (rag.text) blocks.push(rag.text)
     const mem = await buildMemoryInjection(prompt, { workspaceId: opts.workspaceId })
