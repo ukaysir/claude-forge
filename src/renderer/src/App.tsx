@@ -10,6 +10,7 @@ import DebugSidePanel from './components/chat/DebugSidePanel'
 import CostView from './components/cost/CostView'
 import GuideView from './components/guide/GuideView'
 import ThemeView from './components/theme/ThemeView'
+import NotesView from './components/notes/NotesView'
 import PersonaModal from './components/persona/PersonaModal'
 import CommandPalette, { type PaletteAction } from './components/palette/CommandPalette'
 import ShortcutsHelp from './components/ShortcutsHelp'
@@ -137,7 +138,9 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
   useEffect(() => saveJson('forge-max-budget', maxBudget), [maxBudget])
   useEffect(() => saveJson('forge-auto-compact', autoCompact), [autoCompact])
   useEffect(() => saveJson('forge-lazy-level', lazyLevel), [lazyLevel])
-  const [view, setView] = useState<'chat' | 'squad' | 'cost' | 'extend' | 'guide' | 'theme'>('chat')
+  const [view, setView] = useState<
+    'chat' | 'squad' | 'cost' | 'extend' | 'guide' | 'theme' | 'notes'
+  >('chat')
   // Debug stream — starts collecting agent events immediately on login (zero extra
   // tokens). Data flows to SquadView (Inspect button) and DebugSidePanel (chat).
   const { runs: debugRuns, currentRunId: debugRunId } = useDebugStream()
@@ -332,6 +335,7 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
       go('Extend', 'extend'),
       go('Guide', 'guide'),
       go('Theme', 'theme'),
+      go('Notes', 'notes'),
       { id: 'new', section: 'Session', label: 'New conversation', hint: '/new', run: newSession },
       {
         id: 'search-all',
@@ -500,6 +504,13 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
             <Icon name="theme" />
             THEME
           </button>
+          <button
+            className={`mode-tab ${view === 'notes' ? 'on' : ''}`}
+            onClick={() => setView('notes')}
+          >
+            <Icon name="notes" />
+            NOTES
+          </button>
         </div>
         <div className="view-body">
           <div className="view-pane chat-pane" style={{ display: view === 'chat' ? 'flex' : 'none' }}>
@@ -623,6 +634,9 @@ function MainShell({ mode, onClear }: { mode: AuthMode; onClear: () => void }): 
           </div>
           <div className="view-pane" style={{ display: view === 'theme' ? 'flex' : 'none' }}>
             <ThemeView />
+          </div>
+          <div className="view-pane" style={{ display: view === 'notes' ? 'flex' : 'none' }}>
+            <NotesView />
           </div>
         </div>
       </main>

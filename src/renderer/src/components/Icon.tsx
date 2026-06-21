@@ -19,6 +19,7 @@ export type IconName =
   | 'guide'
   | 'cost'
   | 'theme'
+  | 'notes'
   | 'thinking'
   | 'inspect'
   | 'upgrade'
@@ -112,6 +113,14 @@ const PATHS: Record<IconName, JSX.Element> = {
       <circle cx="7.5" cy="11.5" r="0.6" />
       <circle cx="9.5" cy="7.5" r="0.6" />
       <circle cx="14.5" cy="7.5" r="0.6" />
+    </>
+  ),
+  // Pencil over a page — capture an insight/idea (Notes tab). Distinct from
+  // `file` (a document) and `guide` (a book): the nib marks it as writing.
+  notes: (
+    <>
+      <path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5" />
+      <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z" />
     </>
   ),
   // Magnifier — inspect / debug a run.

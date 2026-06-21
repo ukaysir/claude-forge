@@ -42,6 +42,7 @@ import type { KeywordMatch } from '../main/keywords'
 import type { LazyLevel } from '../main/lazy'
 import type { WorkspaceFile } from '../main/workspace'
 import type { MemoryEntry } from '../main/memory'
+import type { Note, NoteInput } from '../main/notes/store'
 import type { RepoMapResult } from '../main/repomap'
 
 /** The safe surface exposed to the renderer as window.forge. */
@@ -201,6 +202,17 @@ const forge = {
     toolsEnabled: (): Promise<boolean> => ipcRenderer.invoke('memory:tools-enabled'),
     setToolsEnabled: (on: boolean): Promise<boolean> =>
       ipcRenderer.invoke('memory:set-tools-enabled', on)
+  },
+  notes: {
+    /** All notes (Supabase-backed), pinned first then most-recently edited. */
+    list: (): Promise<Note[]> => ipcRenderer.invoke('notes:list'),
+    /** Insert a note; resolves to the created row. */
+    create: (input: NoteInput): Promise<Note> => ipcRenderer.invoke('notes:create', input),
+    /** Patch a note by id; resolves to the updated row. */
+    update: (id: string, patch: NoteInput): Promise<Note> =>
+      ipcRenderer.invoke('notes:update', id, patch),
+    /** Delete a note by id. */
+    delete: (id: string): Promise<void> => ipcRenderer.invoke('notes:delete', id)
   },
   activity: {
     /** Current live + persisted agent activity for the Squad dashboard. */

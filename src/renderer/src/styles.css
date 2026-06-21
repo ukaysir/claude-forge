@@ -14,6 +14,7 @@
  *   08-palette  Command palette (Cmd/Ctrl+K)
  *   09-debug    Debug side panel
  *   10-theme    Theme tab — theme marketplace + custom editor
+ *   11-notes    Notes tab — private capture pad for insights and ideas
  */
 @import './styles/00-core.css';
 @import './styles/01-auth.css';
@@ -26,3 +27,4 @@
 @import './styles/08-palette.css';
 @import './styles/09-debug.css';
 @import './styles/10-theme.css';
+@import './styles/11-notes.css';
